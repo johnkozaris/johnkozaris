@@ -35,16 +35,21 @@ const css = await Bun.file(`${root}node_modules/github-markdown-css/github-markd
 
 function page(body: string, w: number): string {
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Profile preview</title><style>${css}
+<title>Preview: github.com/johnkozaris</title><style>${css}
 body{margin:0;background:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 @media (prefers-color-scheme:dark){body{background:#0d1117}.box{border-color:#3d444d!important}.side .n{color:#f0f6fc!important}.side .l{color:#9198a1!important}}
 .wrap{display:flex;gap:24px;justify-content:center;padding:24px 16px}
-.side{width:296px;flex:none}.side .a{width:296px;height:296px;border-radius:50%;background:#c98566}
+.note{font:500 13px -apple-system,BlinkMacSystemFont,sans-serif;text-align:center;padding:8px;background:#fff8c5;color:#3b2300;border-bottom:1px solid #d4a72c66}
+.side{width:296px;flex:none}.side .a{width:296px;height:296px;border-radius:50%;border:1px solid #d1d9e0}
 .side .n{font-size:24px;font-weight:600;color:#1f2328;margin-top:16px}.side .l{color:#59636e;font-size:20px;font-weight:300}
 .box{border:1px solid #d1d9e0;border-radius:6px;padding:24px;width:${w}px;box-sizing:content-box}
 .box .markdown-body{background:transparent}
+/* GitHub hides these links by theme; the preview follows the system setting instead. */
+@media (prefers-color-scheme:dark){[href$="#gh-light-mode-only"]{display:none}}
+@media (prefers-color-scheme:light){[href$="#gh-dark-mode-only"]{display:none}}
 @media (max-width:${w + 400}px){.side{display:none}}
-</style></head><body><div class="wrap"><div class="side"><div class="a"></div><div class="n">John Kozaris</div><div class="l">johnkozaris</div></div>
+</style></head><body><div class="note">Local preview of github.com/johnkozaris, not published. GitHub renders the README the same way.</div>
+<div class="wrap"><div class="side"><img class="a" src="https://avatars.githubusercontent.com/u/11858294?v=4" alt=""><div class="n">John Kozaris</div><div class="l">johnkozaris</div></div>
 <div class="box"><article class="markdown-body">${body}</article></div></div></body></html>`;
 }
 

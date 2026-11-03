@@ -71,6 +71,69 @@ export const terminal = {
   link: "#8FB6E8",
 };
 
+// The profile's own look: GitHub's neutral surfaces, so the pictures sit in the page, with
+// Kodosi's copper as the one accent. Two of each, because <picture> picks by GitHub theme.
+export type Look = {
+  surface: string;
+  border: string;
+  ink: string;
+  muted: string;
+  faint: string;
+  accent: string;
+  accentSoft: string;
+  accentText: string;
+  agent: string;
+  agentEdge: string;
+  ok: string;
+  onOk: string;
+  danger: string;
+  dangerSoft: string;
+  okSoft: string;
+  people: [string, string];
+  shadow: string;
+};
+
+export const looks: Record<"dark" | "light", Look> = {
+  dark: {
+    surface: "#151b23",
+    border: "#3d444d",
+    ink: "#f0f6fc",
+    muted: "#9198a1",
+    faint: "#6e7681",
+    accent: "#DB8A62",
+    accentSoft: "#2f221b",
+    accentText: "#E9A582",
+    agent: "#262c36",
+    agentEdge: "#4b535d",
+    ok: "#7DBB99",
+    onOk: "#0d1117",
+    danger: "#E77A75",
+    dangerSoft: "#3b1d1d",
+    okSoft: "#1c2e25",
+    people: ["#6C9BD2", "#B58BD6"],
+    shadow: "rgba(1,4,9,.7)",
+  },
+  light: {
+    surface: "#f6f8fa",
+    border: "#d1d9e0",
+    ink: "#1f2328",
+    muted: "#59636e",
+    faint: "#818b98",
+    accent: "#B85A26",
+    accentSoft: "#F8E8DC",
+    accentText: "#9C4A1C",
+    agent: "#1f2328",
+    agentEdge: "#1f2328",
+    ok: "#2F7D54",
+    onOk: "#ffffff",
+    danger: "#B23A32",
+    dangerSoft: "#FBE6E4",
+    okSoft: "#E3F1E8",
+    people: ["#3D72B8", "#8A55B8"],
+    shadow: "rgba(31,35,40,.10)",
+  },
+};
+
 export const SANS = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 export const MONO = "'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace";
 

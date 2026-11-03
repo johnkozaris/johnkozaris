@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Story contact sheet</title>
+<style>
+  @font-face { font-family: Inter; font-weight: 400; src: url(../fonts/inter-400.woff2) format("woff2"); }
+  @font-face { font-family: Inter; font-weight: 600; src: url(../fonts/inter-600.woff2) format("woff2"); }
+  body { margin: 0; background: #0d1117; color: #9198a1; font: 12px ui-monospace, monospace; }
+  main { display: grid; grid-template-columns: repeat(var(--cols, 2), 1fr); gap: 10px; padding: 10px; }
+  figure { margin: 0; }
+  canvas { width: 100%; image-rendering: pixelated; display: block; }
+</style>
+</head>
+<body>
+<main id="sheet"></main>
+<script type="module">
+  // ?t=1,2.5,8 for chosen times, or ?scene=3 for six moments of one scene; ?cols=3.
+  import { FILM, seek } from "./story.js";
+  const q = new URLSearchParams(location.search);
+  document.documentElement.style.setProperty("--cols", q.get("cols") ?? 2);
+  await Promise.all([document.fonts.load("600 30px Inter"), document.fonts.load("400 17px Inter")]);
+  let times;
+  if (q.has("t")) times = q.get("t").split(",").map(Number);
+  else if (q.has("scene")) {
+    const s = FILM.SCENES[Number(q.get("scene"))];
+    times = [0.3, 0.2, 0.4, 0.6, 0.8, 0.97].map((k, i) => s.from + (i === 0 ? 0.3 : s.len * k));
+  } else times = FILM.SCENES.map((s) => s.from + s.len * 0.6);
+  for (const t of times) {
+    const fig = document.createElement("figure");
+    const c = Object.assign(document.createElement("canvas"), { width: 960, height: 408 });
+    seek(c, t);
+    fig.append(c, Object.assign(document.createElement("figcaption"), { textContent: `t=${t.toFixed(2)}` }));
+    document.getElementById("sheet").append(fig);
+  }
+  document.title = "ready";
+</script>
+</body>
+</html>

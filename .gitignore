@@ -4,3 +4,4 @@ node_modules/
 .env
 preview/
 .DS_Store
+story/out/
