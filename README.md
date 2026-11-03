@@ -1,10 +1,10 @@
 <p align="center">
-<a href="https://github.com/johnkozaris/johnkozaris/tree/main/story"><img src="assets/story.webp" width="100%" alt="A short pixel-art film: on a Greek waterfront at sunset a friend calls out “Hey John!” and John waves back. He throws the AcubeSAT CubeSat into orbit with the SpaceDot team, where its yeast-on-a-chip payload is imaged and compressed on board, skis to Ireland and joins Microsoft in 2022, builds real-time co-authoring, solves customers' problems with AI agents, invents agent memory with patent EP4651035, watches it shown on stage in 2024 and 2025, works on his open-source projects Kodosi and BoBe at night, builds an agent with a brain and tools with his team, and ends working on a laptop by the lake in Zürich."></a>
+<a href="https://github.com/johnkozaris/johnkozaris/tree/main/story"><img src="assets/story.webp" width="100%" alt="A short pixel-art film: on a Greek waterfront at sunset a friend calls out “Hey John!” and John waves back. He throws the AcubeSAT CubeSat into orbit with the SpaceDot team, where its yeast-on-a-chip payload is imaged and compressed on board, skis to Ireland and joins Microsoft in 2022, builds real-time collaborative editing, solves customers' problems with AI agents, invents agent memory with patent EP4651035, watches it shown on stage in 2024 and 2025, works on his open-source projects Kodosi and BoBe at night, builds an agent with a brain and tools with his team, and ends working on a laptop by the lake in Zürich."></a>
 </p>
 
 <p align="center">
-<a href="https://www.linkedin.com/in/john-kozaris/#gh-dark-mode-only"><picture><source media="(max-width: 600px)" srcset="assets/hero-narrow-dark.svg"><img src="assets/hero-wide-dark.svg" alt="John Kozaris. Senior Software Engineer at Microsoft. I built agent memory and multi-agent orchestration, and led the flight software of a nanosatellite."></picture></a>
-<a href="https://www.linkedin.com/in/john-kozaris/#gh-light-mode-only"><picture><source media="(max-width: 600px)" srcset="assets/hero-narrow-light.svg"><img src="assets/hero-wide-light.svg" alt="John Kozaris. Senior Software Engineer at Microsoft. I built agent memory and multi-agent orchestration, and led the flight software of a nanosatellite."></picture></a>
+<a href="https://www.linkedin.com/in/john-kozaris/#gh-dark-mode-only"><picture><source media="(max-width: 600px)" srcset="assets/hero-narrow-dark.svg"><img src="assets/hero-wide-dark.svg" alt="John Kozaris. I like building things that sound a bit too ambitious. I invented long-term memory for AI agents, architected a runtime where agents hand work to each other, and led the flight software of a nanosatellite."></picture></a>
+<a href="https://www.linkedin.com/in/john-kozaris/#gh-light-mode-only"><picture><source media="(max-width: 600px)" srcset="assets/hero-narrow-light.svg"><img src="assets/hero-wide-light.svg" alt="John Kozaris. I like building things that sound a bit too ambitious. I invented long-term memory for AI agents, architected a runtime where agents hand work to each other, and led the flight software of a nanosatellite."></picture></a>
 </p>
 
 <h3 align="center">Open source</h3>
@@ -24,8 +24,8 @@
 <h3 align="center">At Microsoft</h3>
 
 <p align="center">
-<a href="https://youtu.be/8OviTSFqucI?t=2861"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/proof-memory-dark.svg"><img src="assets/proof-memory-light.svg" alt="Agentic memory: long-term memory for AI agents. Primary inventor. Demo video at 47:41."></picture></a>
-<a href="https://youtu.be/ceV3RsG946s?t=1629"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/proof-orchestration-dark.svg"><img src="assets/proof-orchestration-light.svg" alt="Multi-agent orchestration: agents hand work to other agents. Co-architect. Demo video at 27:09."></picture></a>
+<a href="https://youtu.be/8OviTSFqucI?t=2861"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/proof-memory-dark.svg"><img src="assets/proof-memory-light.svg" alt="Agentic memory: agents that remember and learn from feedback. Primary inventor. Demo video at 47:41."></picture></a>
+<a href="https://youtu.be/ceV3RsG946s?t=1629"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/proof-orchestration-dark.svg"><img src="assets/proof-orchestration-light.svg" alt="Multi-agent orchestration: agents hand work to each other and run it in parallel. Architect. Demo video at 27:09."></picture></a>
 <a href="https://patents.google.com/patent/EP4651035A2/en"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/proof-patent-dark.svg"><img src="assets/proof-patent-light.svg" alt="Patent EP4651035, Memory Management of AI Agents. Primary inventor."></picture></a>
 </p>
 
@@ -33,7 +33,7 @@
 <h3 align="center">Orbit</h3>
 
 <p align="center">
-<a href="https://github.com/johnkozaris/johnkozaris/tree/main/worker"><img src="https://play.johnkozaris.com/board.svg" width="100%" alt="Orbit, a game everyone plays together: the CubeSat, the swarm closing in, its battery and the capabilities it has picked up."></a>
+<a href="https://github.com/johnkozaris/johnkozaris/tree/main/worker"><img src="https://play.johnkozaris.com/board.svg" width="90%" alt="Orbit, a game everyone plays together: the CubeSat, the swarm closing in, its battery and the capabilities it has picked up."></a>
 </p>
 
 <p align="center"><a href="https://play.johnkozaris.com/move/up"><img src="assets/orbit-up.svg" width="56" alt="Fly up"></a><br><a href="https://play.johnkozaris.com/move/left"><img src="assets/orbit-left.svg" width="56" alt="Fly left"></a> <a href="https://play.johnkozaris.com/move/down"><img src="assets/orbit-down.svg" width="56" alt="Fly down"></a> <a href="https://play.johnkozaris.com/move/right"><img src="assets/orbit-right.svg" width="56" alt="Fly right"></a></p>

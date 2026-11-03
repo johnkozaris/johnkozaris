@@ -1,6 +1,6 @@
 // play.johnkozaris.com: Orbit, played from the GitHub profile README. Everyone flies the same
 // CubeSat. Each arrow in the README is a link here; a click moves the satellite one step and the
-// visitor goes straight back to the profile, whose board image now shows that step.
+// visitor goes straight back to the README, whose board image now shows that step.
 import { DurableObject } from "cloudflare:workers";
 import { freshState, newRun, step, type Dir, type State } from "./orbit";
 import { boardSvg } from "./board";
@@ -8,8 +8,10 @@ import { boardSvg } from "./board";
 // BACK_URL is only set by `wrangler dev`, to come back to the local preview.
 type Env = { GAME: DurableObjectNamespace<Game>; BACK_URL?: string };
 
-const PROFILE = "https://github.com/johnkozaris";
-const BACK = `${PROFILE}#user-content-orbit`;
+// Back to the README on the profile repository's page rather than the profile itself: the repo
+// page scrolls to the anchor again once its images have loaded, so the visitor lands on the
+// board. On the profile page the images above push the board down after the jump.
+const BACK = "https://github.com/johnkozaris/johnkozaris#user-content-orbit";
 const THROTTLE_MS = 600;
 
 export class Game extends DurableObject<Env> {

@@ -1,11 +1,11 @@
-// The top of the profile: the name and a few plain facts, set in the same type as the cards.
+// The top of the profile: the name, a line, and a few plain facts, set in the same type as the cards.
 import { SANS, esc, type Look } from "../shared/theme";
 import { wrap, f2, svgDoc } from "./svg";
 
 export const NAME = "John Kozaris";
-export const ROLE = "Senior Software Engineer at Microsoft";
+export const ROLE = "I like building things that sound a bit too ambitious";
 export const ABOUT =
-  "I built agent memory and multi-agent orchestration, and led the flight software of a nanosatellite.";
+  "I invented long-term memory for AI agents, architected a runtime where agents hand work to each other, and led the flight software of a nanosatellite.";
 
 export function heroSvg(l: Look, narrow: boolean): string {
   const W = narrow ? 360 : 860;
@@ -13,12 +13,15 @@ export function heroSvg(l: Look, narrow: boolean): string {
   const roleSize = narrow ? 18 : 21;
   const aboutSize = narrow ? 15 : 16.5;
   const lead = aboutSize * 1.5;
+  const roles = wrap(ROLE, "inter-500", roleSize, narrow ? 280 : 760);
   const lines = wrap(ABOUT, "inter-400", aboutSize, narrow ? 330 : 640);
   const cx = W / 2;
   let y = nameSize * 0.78 + 8;
   let body = `<text x="${cx}" y="${f2(y)}" text-anchor="middle" class="name">${esc(NAME)}</text>`;
-  y += roleSize + 20;
-  body += `<text x="${cx}" y="${f2(y)}" text-anchor="middle" class="role">${esc(ROLE)}</text>`;
+  roles.forEach((line, i) => {
+    y += i ? roleSize * 1.3 : roleSize + 20;
+    body += `<text x="${cx}" y="${f2(y)}" text-anchor="middle" class="role">${esc(line)}</text>`;
+  });
   y += 14;
   lines.forEach((line) => {
     y += lead;
