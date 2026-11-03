@@ -2,7 +2,6 @@
 // what the sanitizer strips is stripped here too, then sits in a mock of the profile page.
 //   bun scripts/preview.ts            http://localhost:8790
 //   ?w=343                            README column width in px (343 is a phone)
-//   ?live=1                           use play.johnkozaris.com instead of wrangler dev
 const PORT = 8790;
 const root = new URL("..", import.meta.url).pathname;
 const token = (await Bun.$`gh auth token`.text()).trim();
@@ -23,11 +22,10 @@ async function rendered(): Promise<string> {
   return cache.html;
 }
 
-function localize(html: string, live: boolean): string {
+function localize(html: string): string {
   html = html.replace(/(src|srcset)="https:\/\/camo\.githubusercontent\.com\/[^"]+"([^>]*?)data-canonical-src="([^"]+)"/g, '$1="$3"$2');
   html = html.replace(/https:\/\/github\.com\/johnkozaris\/johnkozaris\/(?:raw|blob)\/(?:HEAD|main)\//g, "/");
   html = html.replace(/https:\/\/raw\.githubusercontent\.com\/johnkozaris\/johnkozaris\/(?:HEAD|main)\//g, "/");
-  if (!live) html = html.replaceAll("https://play.johnkozaris.com", "http://localhost:8787");
   return html;
 }
 
@@ -60,7 +58,7 @@ Bun.serve({
     if (url.pathname === "/") {
       try {
         const w = Number(url.searchParams.get("w") ?? 846);
-        return new Response(page(localize(await rendered(), url.searchParams.has("live")), w), {
+        return new Response(page(localize(await rendered()), w), {
           headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
         });
       } catch (e) {

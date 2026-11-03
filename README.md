@@ -3,8 +3,8 @@
 </p>
 
 <p align="center">
-<a href="https://johnkozaris.com/#gh-dark-mode-only"><picture><source media="(max-width: 600px)" srcset="assets/hero-narrow-dark.svg"><img src="assets/hero-wide-dark.svg" alt="John Kozaris. I like building things that sound a bit too ambitious."></picture></a>
-<a href="https://johnkozaris.com/#gh-light-mode-only"><picture><source media="(max-width: 600px)" srcset="assets/hero-narrow-light.svg"><img src="assets/hero-wide-light.svg" alt="John Kozaris. I like building things that sound a bit too ambitious."></picture></a>
+<a href="https://johnkozaris.com/#gh-dark-mode-only"><picture><source media="(max-width: 600px)" srcset="assets/hero-narrow-dark.svg"><img src="assets/hero-wide-dark.svg" alt="John Kozaris"></picture></a>
+<a href="https://johnkozaris.com/#gh-light-mode-only"><picture><source media="(max-width: 600px)" srcset="assets/hero-narrow-light.svg"><img src="assets/hero-wide-light.svg" alt="John Kozaris"></picture></a>
 </p>
 
 <h3 align="center">Open source</h3>
@@ -20,16 +20,5 @@
 <a href="https://github.com/johnkozaris/tebis"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/repo-tebis-dark.svg"><img src="assets/repo-tebis-light.svg" alt="tebis: drive AI coding agents running in tmux from Telegram."></picture></a>
 <a href="https://github.com/johnkozaris/mcpHomeManager"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/repo-home-dark.svg"><img src="assets/repo-home-light.svg" alt="mcpHomeManager: self-hosted MCP gateway for homelab services."></picture></a>
 </p>
-
-<a name="orbit"></a>
-<h3 align="center">Orbit</h3>
-
-<p align="center">
-<a href="https://github.com/johnkozaris/johnkozaris/tree/main/worker"><img src="https://play.johnkozaris.com/board.svg" width="90%" alt="Orbit, a game everyone plays together: the CubeSat, the swarm closing in, its battery and the capabilities it has picked up."></a>
-</p>
-
-<p align="center"><a href="https://play.johnkozaris.com/move/up"><img src="assets/orbit-up.svg" width="56" alt="Fly up"></a><br><a href="https://play.johnkozaris.com/move/left"><img src="assets/orbit-left.svg" width="56" alt="Fly left"></a> <a href="https://play.johnkozaris.com/move/down"><img src="assets/orbit-down.svg" width="56" alt="Fly down"></a> <a href="https://play.johnkozaris.com/move/right"><img src="assets/orbit-right.svg" width="56" alt="Fly right"></a></p>
-
-<p align="center"><sub>Everyone flies the same CubeSat. Each click moves it one step, its capabilities fire on their own, and the swarm closes in. Pick up Search, Orchestration, Memory, Tools and Vision on the way, and keep the battery alive.</sub></p>
 
 <p align="center"><sub><a href="https://johnkozaris.com">johnkozaris.com</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://x.com/kozaris">X</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.linkedin.com/in/john-kozaris/">LinkedIn</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://github.com/johnkozaris/johnkozaris/blob/main/HOW-IT-WORKS.md">How this page works</a></sub></p>
