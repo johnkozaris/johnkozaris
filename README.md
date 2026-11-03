@@ -40,4 +40,4 @@
 
 <p align="center"><sub>Everyone flies the same CubeSat. Each click moves it one step, its capabilities fire on their own, and the swarm closes in. Pick up Search, Orchestration, Memory, Tools and Vision on the way, and keep the battery alive.</sub></p>
 
-<p align="center"><sub><a href="https://x.com/kozaris">X</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.linkedin.com/in/john-kozaris/">LinkedIn</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://github.com/johnkozaris/johnkozaris/blob/main/HOW-IT-WORKS.md">How this page works</a></sub></p>
+<p align="center"><sub><a href="https://johnkozaris.com">johnkozaris.com</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://x.com/kozaris">X</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.linkedin.com/in/john-kozaris/">LinkedIn</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://github.com/johnkozaris/johnkozaris/blob/main/HOW-IT-WORKS.md">How this page works</a></sub></p>
