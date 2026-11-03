@@ -920,7 +920,7 @@ export function memory(t) {
 memory.entry = [88, 130];
 memory.exit = [250, 130, 69];
 
-// --- 8. Build ---
+// --- 8. On stage: the work shown in 2024 and 2025 ---
 
 export function build(t) {
   rect(0, 0, W, H, "#06070d");
@@ -939,7 +939,7 @@ export function build(t) {
   rect(sx - 2, sy - 2, 196, 78, "#1c2230");
   rect(sx, sy, 192, 74, "#0f1626");
   const second = t > 2.6;
-  text(second ? "BUILD 2025" : "BUILD 2024", sx + 8, sy + 7, "#f0f6fc", 2);
+  text(second ? "2025" : "2024", sx + 8, sy + 7, "#f0f6fc", 2);
   if (!second) {
     agent(sx + 30, sy + 40, t, 1);
     for (let i = 0; i < 4; i++) {

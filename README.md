@@ -29,4 +29,15 @@
 <a href="https://patents.google.com/patent/EP4651035A2/en"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/proof-patent-dark.svg"><img src="assets/proof-patent-light.svg" alt="Patent EP4651035, Memory Management of AI Agents. Primary inventor."></picture></a>
 </p>
 
-<p align="center"><sub><a href="https://x.com/kozaris">X</a> · <a href="https://www.linkedin.com/in/john-kozaris/">LinkedIn</a> · <a href="https://github.com/johnkozaris/johnkozaris/blob/main/HOW-IT-WORKS.md">How this page works</a></sub></p>
+<a name="play"></a>
+<h3 align="center">Connect Four</h3>
+
+<p align="center">
+<a href="https://github.com/johnkozaris/johnkozaris/tree/main/worker"><picture><source media="(max-width: 600px)" srcset="https://play.johnkozaris.com/status.svg?narrow"><img src="https://play.johnkozaris.com/status.svg" width="70%" alt="Connect Four against a bot: whose move it is and the score so far."></picture></a>
+</p>
+
+<p align="center"><a href="https://play.johnkozaris.com/drop/0"><img src="https://play.johnkozaris.com/col/0.svg" width="10%" alt="Column 1: drop a piece here"></a><a href="https://play.johnkozaris.com/drop/1"><img src="https://play.johnkozaris.com/col/1.svg" width="10%" alt="Column 2: drop a piece here"></a><a href="https://play.johnkozaris.com/drop/2"><img src="https://play.johnkozaris.com/col/2.svg" width="10%" alt="Column 3: drop a piece here"></a><a href="https://play.johnkozaris.com/drop/3"><img src="https://play.johnkozaris.com/col/3.svg" width="10%" alt="Column 4: drop a piece here"></a><a href="https://play.johnkozaris.com/drop/4"><img src="https://play.johnkozaris.com/col/4.svg" width="10%" alt="Column 5: drop a piece here"></a><a href="https://play.johnkozaris.com/drop/5"><img src="https://play.johnkozaris.com/col/5.svg" width="10%" alt="Column 6: drop a piece here"></a><a href="https://play.johnkozaris.com/drop/6"><img src="https://play.johnkozaris.com/col/6.svg" width="10%" alt="Column 7: drop a piece here"></a></p>
+
+<p align="center"><sub>Click a column to drop a piece. Everyone who visits plays the same board, against a bot that looks five moves ahead.</sub></p>
+
+<p align="center"><sub><a href="https://x.com/kozaris">X</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.linkedin.com/in/john-kozaris/">LinkedIn</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://github.com/johnkozaris/johnkozaris/blob/main/HOW-IT-WORKS.md">How this page works</a></sub></p>

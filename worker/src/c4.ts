@@ -1,8 +1,8 @@
 // Connect Four on a 7x6 board. Cell index = col * ROWS + row, row 0 at the bottom.
 export const COLS = 7;
 export const ROWS = 6;
-export const HUMAN = 1;
-export const DOSI = 2;
+export const VISITOR = 1;
+export const BOT = 2;
 
 export type Cell = 0 | 1 | 2;
 export type Board = Cell[];
@@ -51,7 +51,7 @@ const ORDER = [3, 2, 4, 1, 5, 0, 6];
 const WIN = 1_000_000;
 
 function evaluate(board: Board, me: Cell): number {
-  const them = me === HUMAN ? DOSI : HUMAN;
+  const them = me === VISITOR ? BOT : VISITOR;
   let score = 0;
   for (let r = 0; r < ROWS; r++) {
     const v = board[at(3, r)];
@@ -75,7 +75,7 @@ type Search = { nodes: number; budget: number };
 
 function negamax(board: Board, me: Cell, depth: number, alpha: number, beta: number, ply: number, s: Search): number {
   s.nodes++;
-  const them = me === HUMAN ? DOSI : HUMAN;
+  const them = me === VISITOR ? BOT : VISITOR;
   let any = false;
   for (const col of ORDER) {
     const row = height(board, col);
@@ -102,15 +102,15 @@ function negamax(board: Board, me: Cell, depth: number, alpha: number, beta: num
   return best;
 }
 
-// Dosi looks `depth` moves ahead and picks at random among moves that score the same.
-export function dosiMove(board: Board, depth = 6, budget = 60_000, rand = Math.random): number {
+// The bot looks `depth` moves ahead and picks at random among moves that score the same.
+export function botMove(board: Board, depth = 6, budget = 60_000, rand = Math.random): number {
   const s: Search = { nodes: 0, budget };
   const scored: [number, number][] = [];
   for (const col of ORDER) {
     const row = height(board, col);
     if (row === ROWS) continue;
-    board[at(col, row)] = DOSI;
-    const v = winLine(board, col, row) ? WIN : -negamax(board, HUMAN, depth - 1, -Infinity, Infinity, 1, s);
+    board[at(col, row)] = BOT;
+    const v = winLine(board, col, row) ? WIN : -negamax(board, VISITOR, depth - 1, -Infinity, Infinity, 1, s);
     board[at(col, row)] = 0;
     scored.push([col, v]);
   }

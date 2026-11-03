@@ -1,6 +1,6 @@
 // SVGs for the board: seven column tracks the visitor clicks, and a status tile above them.
 // The board is dark in both appearances, like a terminal, so one image serves both themes.
-import { ROWS, HUMAN, DOSI, at, height } from "./c4";
+import { ROWS, VISITOR, BOT, at, height } from "./c4";
 import { dark as P, terminal as T, fontFaces, SANS, MONO, esc } from "../../shared/theme";
 import type { State } from "./state";
 
@@ -31,7 +31,7 @@ function hole(y: number): string {
   );
 }
 
-function human(y: number): string {
+function visitorPiece(y: number): string {
   return (
     `<circle cx="51.5" cy="${y + 2.5}" r="${R_PIECE}" fill="#000" opacity=".5"/>` +
     `<circle cx="50" cy="${y}" r="${R_PIECE}" fill="${P.accent}"/>` +
@@ -40,7 +40,7 @@ function human(y: number): string {
   );
 }
 
-// A continuous-corner square, close to the squircles Kodosi uses for agents.
+// A continuous-corner square, for the bot's pieces.
 // Returns its four quarters, starting at the left middle and going clockwise.
 function squircleQuarters(x: number, y: number, s: number): string[] {
   const h = s / 2;
@@ -63,7 +63,7 @@ function eyes(x: number, y: number, color: string, cls = ""): string {
   return `<g class="${cls}">${e(x - 9.5)}${e(x + 9.5)}</g>`;
 }
 
-function dosi(y: number, awake: boolean, blink: boolean): string {
+function botPiece(y: number, awake: boolean, blink: boolean): string {
   return (
     `<path d="${squircle(51.5, y + 2.5, 60)}" fill="#000" opacity=".5"/>` +
     `<path d="${squircle(50, y, 60)}" fill="${P.lifted}"/>` +
@@ -92,14 +92,14 @@ const blinkCss = (delay: number) =>
   `.blink{transform-box:fill-box;transform-origin:center;animation:blink 180ms ${delay}ms 1 both}` +
   `@keyframes blink{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.12)}}`;
 
-// Delays line the two drops up across images: the human piece lands, then Dosi answers.
-const HUMAN_DELAY = 250;
-const DOSI_DELAY = 1050;
+// Delays line the two drops up across images: the visitor's piece lands, then the bot answers.
+const VISITOR_DELAY = 250;
+const BOT_DELAY = 1050;
 
 export function columnSvg(s: State, col: number, now: number): string {
   const board = s.board;
-  const lastHuman = [...s.moves].reverse().find((m) => m.by === HUMAN);
-  const lastDosi = [...s.moves].reverse().find((m) => m.by === DOSI);
+  const lastVisitor = [...s.moves].reverse().find((m) => m.by === VISITOR);
+  const lastBot = [...s.moves].reverse().find((m) => m.by === BOT);
   const win = new Set(s.winLine);
   const css: string[] = [];
   let body = "";
@@ -115,17 +115,17 @@ export function columnSvg(s: State, col: number, now: number): string {
     const who = board[at(col, row)];
     if (!who) continue;
     const y = cy(row);
-    const isLastHuman = lastHuman && lastHuman.col === col && lastHuman.row === row;
-    const isLastDosi = lastDosi && lastDosi.col === col && lastDosi.row === row;
-    const recent = (isLastHuman && now - lastHuman!.at < RECENT_MS) || (isLastDosi && now - lastDosi!.at < RECENT_MS);
-    let piece = who === HUMAN ? human(y) : dosi(y, !!isLastDosi, !!(isLastDosi && recent));
+    const isLastVisitor = lastVisitor && lastVisitor.col === col && lastVisitor.row === row;
+    const isLastBot = lastBot && lastBot.col === col && lastBot.row === row;
+    const recent = (isLastVisitor && now - lastVisitor!.at < RECENT_MS) || (isLastBot && now - lastBot!.at < RECENT_MS);
+    let piece = who === VISITOR ? visitorPiece(y) : botPiece(y, !!isLastBot, !!(isLastBot && recent));
     if (win.has(at(col, row))) {
       piece += `<circle cx="50" cy="${y}" r="${R_HOLE + 2}" fill="none" stroke="${P.ink}" stroke-width="2.5"/>`;
     }
     if (recent) {
       const id = `d${row}`;
-      css.push(dropCss({ id, dist: y + 40, delay: isLastHuman ? HUMAN_DELAY : DOSI_DELAY }));
-      if (isLastDosi) css.push(blinkCss(DOSI_DELAY + 700));
+      css.push(dropCss({ id, dist: y + 40, delay: isLastVisitor ? VISITOR_DELAY : BOT_DELAY }));
+      if (isLastBot) css.push(blinkCss(BOT_DELAY + 700));
       body += `<g class="${id}">${piece}</g>`;
     } else body += piece;
   }
@@ -144,21 +144,19 @@ export function columnSvg(s: State, col: number, now: number): string {
 
 // The tile above the board. `narrow` is the phone layout: two short lines over the score.
 export function statusSvg(s: State, now: number, narrow = false): string {
-  const lastDosi = [...s.moves].reverse().find((m) => m.by === DOSI);
-  const recent = !!lastDosi && now - lastDosi.at < RECENT_MS;
+  const lastBot = [...s.moves].reverse().find((m) => m.by === BOT);
+  const recent = !!lastBot && now - lastBot.at < RECENT_MS;
   const n = (x: number) => x.toLocaleString("en-US");
   let lines: [string, string];
-  if (s.status === "humans") lines = ["Humans win.", "Pick a column for a new game."];
-  else if (s.status === "dosi") lines = ["Dosi wins.", "Pick a column for a new game."];
+  if (s.status === "visitors") lines = ["Visitors win.", "Pick a column for a new game."];
+  else if (s.status === "bot") lines = ["The bot wins.", "Pick a column for a new game."];
   else if (s.status === "draw") lines = ["Draw.", "Pick a column for a new game."];
-  else if (lastDosi) lines = [`Dosi played column ${lastDosi.col + 1}.`, "Your move."];
+  else if (lastBot) lines = [`The bot played column ${lastBot.col + 1}.`, "Your move."];
   else lines = ["Your move.", "Pick a column to drop a piece."];
   if (narrow && lines[1].startsWith("Pick a column for")) lines[1] = "New game: pick a column.";
 
-  const score = narrow
-    ? `humans ${n(s.score.humans)} · dosi ${n(s.score.dosi)} · draws ${n(s.score.draws)}`
-    : `humans ${n(s.score.humans)}  ·  dosi ${n(s.score.dosi)}  ·  draws ${n(s.score.draws)}  ·  ${n(s.totalMoves)} moves`;
-  const look = lastDosi ? (lastDosi.col - 3) * 1.6 : 0;
+  const score = `Visitors ${n(s.score.visitors)}, bot ${n(s.score.bot)}, draws ${n(s.score.draws)}`;
+  const look = lastBot ? (lastBot.col - 3) * 1.6 : 0;
   const w = narrow ? 350 : 700;
   const h = narrow ? 150 : 108;
   const tw = w - 14;
@@ -169,11 +167,11 @@ export function statusSvg(s: State, now: number, narrow = false): string {
       `<text x="24" y="114" class="s" xml:space="preserve">${esc(score)}</text>`
     : `<text x="112" y="44" class="t">${esc(lines.join(" "))}</text>` +
       `<text x="112" y="72" class="s" xml:space="preserve">${esc(score)}</text>` +
-      `<text x="672" y="72" class="f" text-anchor="end">looks 5 moves ahead</text>`;
+      `<text x="672" y="72" class="f" text-anchor="end">${n(s.totalMoves)} moves played</text>`;
   const size = narrow ? 19 : 21;
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${esc(lines.join(" "))}">` +
-    `<style>${fontFaces(["inter-600", "mono-400"])}${recent ? blinkCss(DOSI_DELAY + 900) : ""}${reduced}` +
+    `<style>${fontFaces(["inter-600", "mono-400"])}${recent ? blinkCss(BOT_DELAY + 900) : ""}${reduced}` +
     `.t{font:600 ${size}px ${SANS};fill:${T.ink};letter-spacing:-.2px}.m{fill:${T.muted}}.s{font:400 13px ${MONO};fill:${T.muted}}.f{font:400 13px ${MONO};fill:${T.faint}}</style>` +
     `<rect x="9" y="5" width="${tw}" height="${th}" rx="18" fill="#000" opacity=".35"/>` +
     `<rect x="7" y="2" width="${tw}" height="${th}" rx="18" fill="${T.band}"/>` +

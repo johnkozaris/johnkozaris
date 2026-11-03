@@ -59,7 +59,7 @@ Bun.serve({
     const url = new URL(req.url);
     if (url.pathname === "/") {
       try {
-        const w = Number(url.searchParams.get("w") ?? 870);
+        const w = Number(url.searchParams.get("w") ?? 846);
         return new Response(page(localize(await rendered(), url.searchParams.has("live")), w), {
           headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
         });

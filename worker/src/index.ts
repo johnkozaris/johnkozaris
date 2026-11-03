@@ -1,8 +1,9 @@
-// play.johnkozaris.com: Connect Four against Dosi, played from the GitHub profile README.
-// Each column in the README is a link here; a click drops a piece, Dosi answers, and the
-// visitor goes straight back to the profile, whose images now show the new board.
+// play.johnkozaris.com: Connect Four against a bot, played from the GitHub profile README.
+// Everyone who visits plays the same board. Each column in the README is a link here; a click
+// drops a piece, the bot answers, and the visitor goes straight back to the profile, whose
+// images now show the new board.
 import { DurableObject } from "cloudflare:workers";
-import { ROWS, COLS, HUMAN, DOSI, at, height, winLine, dosiMove } from "./c4";
+import { ROWS, COLS, VISITOR, BOT, at, height, winLine, botMove } from "./c4";
 import { fresh, type State } from "./state";
 import { columnSvg, statusSvg } from "./render";
 
@@ -10,7 +11,7 @@ import { columnSvg, statusSvg } from "./render";
 type Env = { GAME: DurableObjectNamespace<Game>; BACK_URL?: string };
 
 const PROFILE = "https://github.com/johnkozaris";
-const BACK = `${PROFILE}#user-content-play-dosi`;
+const BACK = `${PROFILE}#user-content-play`;
 const THROTTLE_MS = 1200;
 
 export class Game extends DurableObject<Env> {
@@ -43,10 +44,10 @@ export class Game extends DurableObject<Env> {
       s.totalMoves++;
       const line = winLine(s.board, c, r);
       if (line) {
-        s.status = by === HUMAN ? "humans" : "dosi";
+        s.status = by === VISITOR ? "visitors" : "bot";
         s.winLine = line;
-        if (by === HUMAN) s.score.humans++;
-        else s.score.dosi++;
+        if (by === VISITOR) s.score.visitors++;
+        else s.score.bot++;
         return true;
       }
       if (s.moves.length === COLS * ROWS) {
@@ -57,9 +58,9 @@ export class Game extends DurableObject<Env> {
       return false;
     };
 
-    if (!place(col, row, HUMAN)) {
-      const reply = dosiMove(s.board, 5, 25_000);
-      if (reply >= 0) place(reply, height(s.board, reply), DOSI);
+    if (!place(col, row, VISITOR)) {
+      const reply = botMove(s.board, 5, 25_000);
+      if (reply >= 0) place(reply, height(s.board, reply), BOT);
     }
     this.state = s;
     await this.ctx.storage.put("state", s);
@@ -85,7 +86,7 @@ export default {
     if (req.method !== "GET" && req.method !== "HEAD") return new Response(null, { status: 405 });
     if (pathname === "/robots.txt") return new Response("User-agent: *\nDisallow: /\n");
 
-    const game = env.GAME.getByName("board");
+    const game = env.GAME.getByName("shared");
     let m: RegExpMatchArray | null;
 
     if ((m = pathname.match(/^\/drop\/([0-6])$/))) {
