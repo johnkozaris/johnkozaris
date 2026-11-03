@@ -4,8 +4,6 @@
 <meta charset="utf-8">
 <title>Story contact sheet</title>
 <style>
-  @font-face { font-family: Inter; font-weight: 400; src: url(../fonts/inter-400.woff2) format("woff2"); }
-  @font-face { font-family: Inter; font-weight: 600; src: url(../fonts/inter-600.woff2) format("woff2"); }
   body { margin: 0; background: #0d1117; color: #9198a1; font: 12px ui-monospace, monospace; }
   main { display: grid; grid-template-columns: repeat(var(--cols, 2), 1fr); gap: 10px; padding: 10px; }
   figure { margin: 0; }
@@ -19,7 +17,6 @@
   import { FILM, seek } from "./story.js";
   const q = new URLSearchParams(location.search);
   document.documentElement.style.setProperty("--cols", q.get("cols") ?? 2);
-  await Promise.all([document.fonts.load("600 30px Inter"), document.fonts.load("400 17px Inter")]);
   let times;
   if (q.has("t")) times = q.get("t").split(",").map(Number);
   else if (q.has("scene")) {

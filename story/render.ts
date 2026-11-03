@@ -23,7 +23,6 @@ async function frames(dir: string, fps: number) {
     process.exitCode = 1;
   });
   await page.goto(`${SERVER}/story/index.html?t=0`);
-  await page.evaluate(() => (window as any).ready);
   const duration: number = await page.evaluate(() => (window as any).FILM.DURATION);
   const total = Math.round(duration * fps);
   for (let f = 0; f < total; f++) {

@@ -1,6 +1,6 @@
 // The story so far, as a short pixel-art film. seek(canvas, t) draws the frame at t seconds, so
 // the same code plays live on a page and renders frame by frame to video (render.ts).
-// Art is drawn at 320x136 and scaled 3x without smoothing; captions are drawn at full size.
+// Art is drawn at 320x136 and scaled 3x without smoothing.
 import { W, H, art, g, fade, iris, ease, lerp, span } from "./pixel.js";
 import { person, stage } from "./sprites.js";
 import * as S from "./scenes.js";
@@ -13,27 +13,19 @@ const SCALE = 3;
 //   down  the camera tilts down from orbit to the ski slope
 //   door  the office opens out of the door John goes in by
 //   iris  a circle closes on John and opens on him again
-// Captions are facts: a place or a name, then one plain line. Each is [from, to, head, line].
+// There are no captions: signs, screens, logos and what people say tell where he is.
 const SCENES = [
-  { len: 4.0, draw: S.greece, out: "walk", captions: [[0.6, 3.6, "Greece"]] },
-  { len: 4.6, draw: S.lab, out: "cut", captions: [[1.2, 4.4, "AcubeSAT", "On-board software team lead at SpaceDot"]] },
-  {
-    len: 8.6,
-    draw: S.orbit,
-    out: "down",
-    captions: [
-      [0.6, 3.0, "In orbit", "C and C++ flight software on FreeRTOS"],
-      [4.3, 7.4, "Science payload", "Yeast cells on a chip, imaged and compressed on board"],
-    ],
-  },
-  { len: 7.4, draw: S.ski, out: "door", light: true, captions: [[3.9, 6.9, "Microsoft", "Ireland, 2022"]] },
-  { len: 6.4, draw: S.coauthor, out: "walk", light: true, captions: [[1.0, 5.8, "Real-time co-authoring", "On distributed data structures, in .NET"]] },
-  { len: 6.2, draw: S.customers, out: "iris", light: true, captions: [[1.3, 5.6, "With customers", "Solving their problems with AI agents"]] },
-  { len: 6.2, draw: S.memory, out: "walk", captions: [[0.7, 5.6, "Agent memory", "Patent EP4651035"]] },
-  { len: 5.6, draw: S.build, out: "iris", captions: [[1.2, 5.0, "On stage", "Memory in 2024, orchestration in 2025"]] },
-  { len: 6.4, draw: S.openSource, out: "walk", captions: [[0.8, 4.8, "Open source", "Kodosi and BoBe"]] },
-  { len: 7.4, draw: S.workshop, out: "walk", light: true, captions: [[1.2, 6.6, "Building agents", "Leading a team of seven engineers and scientists"]] },
-  { len: 6.0, draw: S.zurich, captions: [[1.3, 5.4, "Zürich"]] },
+  { len: 4.0, draw: S.greece, out: "walk" },
+  { len: 4.6, draw: S.lab, out: "cut" },
+  { len: 8.6, draw: S.orbit, out: "down" },
+  { len: 7.4, draw: S.ski, out: "door" },
+  { len: 6.4, draw: S.coauthor, out: "walk" },
+  { len: 6.2, draw: S.customers, out: "iris" },
+  { len: 6.2, draw: S.memory, out: "walk" },
+  { len: 5.6, draw: S.build, out: "iris" },
+  { len: 6.4, draw: S.openSource, out: "walk" },
+  { len: 7.4, draw: S.workshop, out: "walk" },
+  { len: 6.0, draw: S.zurich },
 ];
 
 let at = 0;
@@ -115,28 +107,6 @@ function transition(prev, scene, local, t) {
   return false;
 }
 
-function shadowed(ctx, str, x, y, color, shadow) {
-  ctx.fillStyle = shadow;
-  ctx.fillText(str, x + 2, y + 2);
-  ctx.fillStyle = color;
-  ctx.fillText(str, x, y);
-}
-
-// Light text with a dark shadow, or on bright scenes dark text with a light one.
-function caption(ctx, head, line, alpha, light) {
-  if (alpha <= 0) return;
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  const shadow = light ? "rgba(255,255,255,.7)" : "rgba(8,8,16,.55)";
-  ctx.font = "600 30px Inter";
-  shadowed(ctx, head, 36, 62, light ? "#1f2328" : "#fff6ea", shadow);
-  if (line) {
-    ctx.font = "400 17px Inter";
-    shadowed(ctx, line, 36, 88, light ? "#3a4048" : "#f3e2cf", shadow);
-  }
-  ctx.restore();
-}
-
 export function seek(canvas, t) {
   const found = SCENES.findIndex((s) => t >= s.from && t < s.from + s.len);
   const i = found === -1 ? SCENES.length - 1 : found;
@@ -164,8 +134,4 @@ export function seek(canvas, t) {
   const ctx = canvas.getContext("2d");
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(art, 0, 0, W * SCALE, H * SCALE);
-  for (const [from, to, head, line] of scene.captions ?? []) {
-    const alpha = Math.min(ease(span(local, from, from + 0.6)), 1 - ease(span(local, to - 0.5, to)));
-    caption(ctx, head, line, alpha, scene.light);
-  }
 }

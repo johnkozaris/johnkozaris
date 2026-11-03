@@ -122,6 +122,7 @@ const ICONS = {
   note: ["..OOO", "..O.O", "..O..", "OOO..", "OOO.."],
   heart: [".O.O.", "OOOOO", "OOOOO", ".OOO.", "..O.."],
   idea: [".OOO.", "OYYYO", "OYYYO", ".OYO.", "..O.."],
+  star: ["..O..", ".OOO.", "OOOOO", ".OOO.", ".O.O."],
 };
 function balloon(x, y, kind, t0, t, len = 1.6) {
   const k = t - t0;
@@ -134,7 +135,7 @@ function balloon(x, y, kind, t0, t, len = 1.6) {
   px(bx + 4, by + 9, "#2a2230");
   px(bx + 5, by + 9, "#2a2230");
   px(bx + 4, by + 8, "#ffffff");
-  const color = kind === "heart" ? "#e8486a" : kind === "note" ? "#3f7fd0" : kind === "!" ? "#e05a3a" : "#2a2230";
+  const color = kind === "heart" ? "#e8486a" : kind === "note" ? "#3f7fd0" : kind === "!" ? "#e05a3a" : kind === "star" ? "#e6a83a" : "#2a2230";
   ICONS[kind].forEach((row, j) => {
     for (let i = 0; i < 5; i++) {
       if (row[i] === "O") px(bx + 3 + i, by + 2 + j, color);
@@ -146,13 +147,32 @@ function balloon(x, y, kind, t0, t, len = 1.6) {
 // Speech gets a slightly wider face than the 3x5 signs, so a name reads at a glance. Each glyph is
 // five rows of its own width; letters without one fall back to the sign font.
 const SPEECH = {
-  H: ["1001", "1001", "1111", "1001", "1001"],
+  A: ["0110", "1001", "1111", "1001", "1001"],
+  B: ["1110", "1001", "1110", "1001", "1110"],
+  C: ["0111", "1000", "1000", "1000", "0111"],
+  D: ["1110", "1001", "1001", "1001", "1110"],
   E: ["1111", "1000", "1110", "1000", "1111"],
-  Y: ["10001", "01010", "00100", "00100", "00100"],
+  F: ["1111", "1000", "1110", "1000", "1000"],
+  G: ["0111", "1000", "1011", "1001", "0111"],
+  H: ["1001", "1001", "1111", "1001", "1001"],
+  I: ["111", "010", "010", "010", "111"],
   J: ["0011", "0001", "0001", "1001", "0110"],
-  O: ["0110", "1001", "1001", "1001", "0110"],
+  K: ["1001", "1010", "1100", "1010", "1001"],
+  L: ["1000", "1000", "1000", "1000", "1111"],
+  M: ["10001", "11011", "10101", "10001", "10001"],
   N: ["1001", "1101", "1011", "1001", "1001"],
+  O: ["0110", "1001", "1001", "1001", "0110"],
+  P: ["1110", "1001", "1110", "1000", "1000"],
+  R: ["1110", "1001", "1110", "1010", "1001"],
+  S: ["0111", "1000", "0110", "0001", "1110"],
+  T: ["11111", "00100", "00100", "00100", "00100"],
+  U: ["1001", "1001", "1001", "1001", "0110"],
+  V: ["10001", "10001", "10001", "01010", "00100"],
+  W: ["10001", "10001", "10101", "11011", "10001"],
+  Y: ["10001", "01010", "00100", "00100", "00100"],
   "!": ["1", "1", "1", "0", "1"],
+  "?": ["0110", "1001", "0010", "0000", "0010"],
+  "'": ["1", "1", "0", "0", "0"],
   " ": ["00", "00", "00", "00", "00"],
 };
 const speechWidth = (str) => [...str].reduce((w, ch) => w + (SPEECH[ch] ? SPEECH[ch][0].length : 3) + 1, -1);
@@ -161,7 +181,7 @@ const speechWidth = (str) => [...str].reduce((w, ch) => w + (SPEECH[ch] ? SPEECH
 function say(x, y, str, t0, t, len = 1.4) {
   const k = t - t0;
   if (k < 0 || k > len) return;
-  const shown = str.slice(0, Math.ceil(clamp(k / 0.35) * str.length));
+  const shown = str.slice(0, Math.ceil(clamp(k / (0.12 + str.length * 0.03)) * str.length));
   const w = speechWidth(str) + 8;
   const bx = Math.round(x - w / 2);
   const by = Math.round(y - 13);
@@ -361,6 +381,8 @@ export function lab(t) {
     cubesatFlat(Math.round(158 + k * 6), Math.round(y), true);
     for (let i = 1; i < 5; i++) px(166 + k * 6, Math.round(y) + 6 + i * 4, "#ffd88f");
   }
+  say(190, 105, "SOFTWARE READY?", 1.3, t, 1.3);
+  say(Math.round(me.x), 101, "READY!", 2.6, t, 0.85);
 }
 lab.entry = [40, 128, 66];
 
@@ -473,6 +495,13 @@ function payload(t) {
       rect(Math.round(lerp(x, 322, p)), Math.round(lerp(y, -8, p)), 4, 3, "#7dffaa");
       for (let i = 1; i < 4; i++) px(Math.round(lerp(x, 322, p)) - i * 3, Math.round(lerp(y, -8, p)) + 2 + i * 2, "#3a9a6a");
     }
+  }
+  const status = t < 0.6 ? "" : t < 1.9 ? "> IMAGING" : t < 2.4 ? "> IMAGE OK" : t < 3.2 ? "> COMPRESSING" : "> SENDING TO EARTH";
+  if (status) {
+    rect(104, 118, 112, 11, "#0a0e14");
+    rect(104, 118, 112, 1, "#2a3550");
+    const w = text(status, 108, 121, "#7dffaa");
+    if (Math.floor(t * 4) % 2 === 0) rect(110 + w, 121, 3, 5, "#7dffaa");
   }
 }
 
@@ -663,6 +692,10 @@ export function ski(t) {
   }
   sheep(474 - cam, HILLS(474) - 2, t, 0);
   sheep(488 - cam, HILLS(488) - 3, t, 2);
+  const fx = 465 - cam;
+  rect(fx, 74, 1, HILLS(465) - 74, "#d9dde4");
+  px(fx, 73, "#f4d35e");
+  for (let c = 0; c < 9; c++) rect(fx + 1 + c, 74 + Math.round(Math.sin(t * 5 - c * 0.7) * 0.8), 1, 6, c < 3 ? "#169b62" : c < 6 ? "#f4f4f0" : "#ff883e");
   ["#c2453a", "#2f6fd0", "#2f7a4a", "#e8b83a"].forEach((c, i) => georgian(TERRACE + i * 24 - cam, 104, c));
   // The office: glass on a concrete frame, a sign, and the door John goes in by.
   const ox = OFFICE - cam;
@@ -675,7 +708,12 @@ export function ski(t) {
       if ((r + c) % 4 === 0) rect(gx + 1, gy + 1, 3, 1, "#d8ebf8");
     }
   rect(ox - 2, 48, 68, 2, "#6c7888");
-  text("MICROSOFT", ox + 32 - textWidth("MICROSOFT") / 2, 41, "#3a4656");
+  const signX = Math.round(ox + 32 - textWidth("MICROSOFT") / 2);
+  text("MICROSOFT", signX, 41, "#3a4656");
+  rect(signX - 7, 41, 2, 2, "#f25022");
+  rect(signX - 4, 41, 2, 2, "#7fba00");
+  rect(signX - 7, 44, 2, 2, "#00a4ef");
+  rect(signX - 4, 44, 2, 2, "#ffb900");
   const dx = OFFICE_DOOR - cam - 8;
   const open = t > 6.6;
   rect(ox + 18, 74, 28, 2, "#6c7888");
@@ -736,6 +774,10 @@ export function coauthor(t) {
       rect(sx + c * cw + 1, sy + r * ch - 2, 3, 2, color);
     }
   });
+  if (t > 1.8) {
+    rect(184, 13, 19, 7, "#d93a3a");
+    text("LIVE", 186, 14, "#ffffff");
+  }
   rect(18, 46, 70, 40, "#c9ced6");
   rect(19, 47, 68, 38, "#fbfcfd");
   rect(18, 86, 70, 2, "#aab1bb");
@@ -763,6 +805,8 @@ export function coauthor(t) {
     }
   }
   if (!seated) john(Math.round(me.x), 130, me.dir, me.x / 48, me.moving ? "walk" : "stand");
+  say(56, 97, "SEE MY EDIT?", 2.8, t, 1.3);
+  say(142, 97, "GOT IT LIVE!", 3.5, t, 1.0);
 }
 coauthor.exit = [250, 130, 58];
 
@@ -801,12 +845,12 @@ export function customers(t) {
     rect(288, 85 + i * 11, 24, 9, "#b8c0ca");
     rect(298, 88 + i * 11, 4, 2, "#6b7380");
   }
-  // They have a problem; John has an idea; three agents fetch what each of them needs.
-  folks.forEach(([x], i) => balloon(x, 104, "?", 1.3 + i * 0.25, t, 1.5));
+  // They have a problem; John has an answer; three agents fetch what each of them needs.
+  say(190, 105, "CAN AN AGENT DO THIS?", 1.2, t, 1.6);
   const [x0, y0] = customers.entry;
   const me = walkPath([[1.0, x0], [1.8, customers.exit[0]]], t);
   john(Math.round(me.x), y0, "right", me.x / 48, me.moving ? "walk" : t > 2.3 && t < 3.0 ? "point" : "stand");
-  balloon(Math.round(me.x), 103, "idea", 2.4, t, 1.2);
+  say(Math.round(me.x), 104, "LET'S BUILD ONE!", 2.4, t, 1.3);
   folks.forEach(([x], i) => {
     const t0 = 2.9 + i * 0.15;
     if (t < t0) return;
@@ -963,6 +1007,7 @@ export function build(t) {
       g.stroke();
     });
     nodes.forEach(([nx, ny], i) => agent(sx + nx, sy + ny, t, i));
+    text("ORCHESTRATION", sx + 80, sy + 7, "#E9A582", 2);
   }
   rect(0, 100, W, 10, "#1c2230");
   rect(0, 100, W, 1, "#4a8fe0");
@@ -1101,7 +1146,8 @@ export function openSource(t) {
   const awake = t > 2.6;
   const happy = t > 4.2;
   bobe(204, 124, t, awake, happy);
-  balloon(210, 101, "idea", 3.0, t, 1.1);
+  balloon(168, 100, "star", 2.2, t, 1.0);
+  say(210, 101, "HI JOHN!", 2.8, t, 1.3);
   balloon(210, 101, "heart", 4.3, t, 1.4);
   // John at the desk, answering the agents that wait for him; then up and on.
   const [x0, y0] = openSource.entry;
@@ -1399,6 +1445,8 @@ export function workshop(t) {
   if (t < 2.25) brain(146, 121);
   else if (!done) brain(146, lerp(121, 96, ease(span(t, 2.25, 2.55))));
   balloon(RX, 96, "heart", 5.4, t, 1.4);
+  say(206, 105, "IT NEEDS A BRAIN!", 1.05, t, 1.4);
+  say(112, 105, "IT WORKS!", 5.5, t, 1.2);
 }
 workshop.entry = [40, 128, 60];
 workshop.exit = [250, 128, 70];
@@ -1484,6 +1532,13 @@ export function zurich(t) {
   rect(222, 84, 1, 22, "#3a3346");
   rect(221, 83, 3, 2, "#3a3346");
   px(222, 85, "#ffd88f");
+  rect(146, 92, 2, 12, "#5a6270");
+  rect(132, 81, 30, 12, "#f2efe8");
+  rect(133, 82, 28, 10, "#2f6fd0");
+  const zx = Math.round(147 - textWidth("ZURICH") / 2);
+  text("ZURICH", zx, 86, "#ffffff");
+  px(zx + 4, 84, "#ffffff");
+  px(zx + 6, 84, "#ffffff");
   const a = walkPath([[1.4, 340], [6.0, 40, "left"]], t);
   person(0, Math.round(a.x), 118, "left", a.x / 48, "walk");
   rect(150, 113, 34, 2, "#6b4428");
