@@ -3,8 +3,8 @@
 </p>
 
 <p align="center">
-<a href="https://www.linkedin.com/in/john-kozaris/#gh-dark-mode-only"><picture><source media="(max-width: 600px)" srcset="assets/hero-narrow-dark.svg"><img src="assets/hero-wide-dark.svg" alt="John Kozaris. ML lead at Microsoft. I built agent memory and multi-agent orchestration for Copilot Studio, both shown in Satya Nadella's Build keynotes. Before Microsoft, I led the flight software of an ESA-funded nanosatellite."></picture></a>
-<a href="https://www.linkedin.com/in/john-kozaris/#gh-light-mode-only"><picture><source media="(max-width: 600px)" srcset="assets/hero-narrow-light.svg"><img src="assets/hero-wide-light.svg" alt="John Kozaris. ML lead at Microsoft. I built agent memory and multi-agent orchestration for Copilot Studio, both shown in Satya Nadella's Build keynotes. Before Microsoft, I led the flight software of an ESA-funded nanosatellite."></picture></a>
+<a href="https://www.linkedin.com/in/john-kozaris/#gh-dark-mode-only"><picture><source media="(max-width: 600px)" srcset="assets/hero-narrow-dark.svg"><img src="assets/hero-wide-dark.svg" alt="John Kozaris. Senior Software Engineer at Microsoft. I built agent memory and multi-agent orchestration for Copilot Studio, both shown in Satya Nadella's Build keynotes. Before Microsoft, I led the flight software of an ESA-funded nanosatellite."></picture></a>
+<a href="https://www.linkedin.com/in/john-kozaris/#gh-light-mode-only"><picture><source media="(max-width: 600px)" srcset="assets/hero-narrow-light.svg"><img src="assets/hero-wide-light.svg" alt="John Kozaris. Senior Software Engineer at Microsoft. I built agent memory and multi-agent orchestration for Copilot Studio, both shown in Satya Nadella's Build keynotes. Before Microsoft, I led the flight software of an ESA-funded nanosatellite."></picture></a>
 </p>
 
 <h3 align="center">Open source</h3>
