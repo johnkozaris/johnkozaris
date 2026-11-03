@@ -3,8 +3,8 @@
 </p>
 
 <p align="center">
-<a href="https://johnkozaris.com/#gh-dark-mode-only"><picture><source media="(max-width: 600px)" srcset="assets/hero-narrow-dark.svg"><img src="assets/hero-wide-dark.svg" alt="John Kozaris"></picture></a>
-<a href="https://johnkozaris.com/#gh-light-mode-only"><picture><source media="(max-width: 600px)" srcset="assets/hero-narrow-light.svg"><img src="assets/hero-wide-light.svg" alt="John Kozaris"></picture></a>
+<a href="https://johnkozaris.com/#gh-dark-mode-only"><picture><source media="(max-width: 600px)" srcset="assets/hero-narrow-dark.svg"><img src="assets/hero-wide-dark.svg" alt="I’m John Kozaris. Software engineer. Maker of things. Take a look"></picture></a>
+<a href="https://johnkozaris.com/#gh-light-mode-only"><picture><source media="(max-width: 600px)" srcset="assets/hero-narrow-light.svg"><img src="assets/hero-wide-light.svg" alt="I’m John Kozaris. Software engineer. Maker of things. Take a look"></picture></a>
 </p>
 
 <h3 align="center">Open source</h3>
