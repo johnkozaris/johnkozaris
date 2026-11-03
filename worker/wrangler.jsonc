@@ -1,0 +1,10 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "johnkozaris-play",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": false,
+  "routes": [{ "pattern": "play.johnkozaris.com", "custom_domain": true }],
+  "durable_objects": { "bindings": [{ "name": "GAME", "class_name": "Game" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Game"] }]
+}
