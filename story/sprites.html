@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sprite sheet</title>
+<style>
+  body { margin: 0; background: #2a2f3a; color: #cfd6e2; font: 12px ui-monospace, monospace; }
+  canvas { display: block; image-rendering: pixelated; margin: 12px; }
+  p { margin: 0 14px; }
+</style>
+</head>
+<body>
+<p>front · back · walk right (4 frames) · left · cheer · lift · cheer from behind · typing — John, then teammates. ?zoom=8</p>
+<canvas id="c"></canvas>
+<script type="module">
+  import { art, g, W, H, rect } from "./pixel.js";
+  import { sheet } from "./sprites.js";
+  const zoom = Number(new URLSearchParams(location.search).get("zoom") ?? 6);
+  const people = ["john", 0, 1, 2, 3, 4, 5];
+  const rowH = 30;
+  g.clearRect(0, 0, W, H);
+  people.forEach((who, r) => {
+    rect(0, r * rowH, 232, rowH, r % 2 ? "#e9edf2" : "#dfe5ec");
+    sheet(who, 2, r * rowH + 2, 0.3);
+  });
+  const c = document.getElementById("c");
+  const h = Math.min(H, people.length * rowH);
+  c.width = 232 * zoom;
+  c.height = h * zoom;
+  const ctx = c.getContext("2d");
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(art, 0, 0, 232, h, 0, 0, 232 * zoom, h * zoom);
+  document.title = "ready";
+</script>
+</body>
+</html>

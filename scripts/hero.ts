@@ -3,7 +3,7 @@ import { SANS, esc, type Look } from "../shared/theme";
 import { wrap, f2, svgDoc } from "./svg";
 
 export const NAME = "John Kozaris";
-export const ROLE = "ML lead at Microsoft";
+export const ROLE = "Senior Software Engineer at Microsoft";
 export const ABOUT =
   "I built agent memory and multi-agent orchestration for Copilot Studio, both shown in Satya Nadella's Build keynotes. Before Microsoft, I led the flight software of an ESA-funded nanosatellite.";
 

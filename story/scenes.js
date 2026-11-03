@@ -1,71 +1,69 @@
-// The scenes. Each draws one moment of the story on the pixel canvas, given seconds since the
-// scene began.
-import { W, H, g, rect, px, hash, bands, disc, ease, lerp, span, clamp, text, textWidth, glow, noise } from "./pixel.js";
-import { person, john, agent } from "./cast.js";
+// The scenes. Each draws one moment of the story on the 320x136 pixel canvas, given seconds since
+// the scene began. A scene may return the door John leaves through, for the door transition.
+import { W, H, art, g, rect, px, hash, bands, disc, ease, lerp, span, clamp, text, textWidth, glow, noise } from "./pixel.js";
+import { person, john } from "./sprites.js";
 
-// --- props ---
+// --- props, at the scale of a 24px person ---
 
-function desk(x, y, w, top = "#8a5a35", front = "#6b4428") {
-  rect(x, y, w, 3, top);
-  rect(x, y + 3, w, 4, front);
-  rect(x + 3, y + 7, 3, H - y - 7, front);
-  rect(x + w - 6, y + 7, 3, H - y - 7, front);
+function desk(x, y, w, floor = 130, top = "#8a5a35", front = "#6b4428") {
+  rect(x, y, w, 2, top);
+  rect(x, y + 2, w, 3, front);
+  rect(x + 2, y + 5, 2, floor - y - 5, front);
+  rect(x + w - 4, y + 5, 2, floor - y - 5, front);
 }
 
-function chair(x, y, c = "#3a3346") {
-  rect(x, y, 10, 2, c);
-  rect(x - 1, y - 12, 2, 14, c);
-  rect(x + 4, y + 2, 2, H - y - 6, c);
-  rect(x + 1, H - 5, 8, 1, c);
+function chair(x, floor, c = "#3a3346") {
+  rect(x, floor - 6, 9, 2, c);
+  rect(x, floor - 15, 2, 11, c);
+  rect(x + 6, floor - 4, 2, 4, c);
+}
+
+function laptop(x, y, screen = "#0d1220", t = 0, code = false) {
+  rect(x, y - 7, 10, 7, "#4a515c");
+  rect(x + 1, y - 6, 8, 5, screen);
+  if (code) for (let i = 0; i < 2; i++) rect(x + 2, y - 5 + i * 2, 2 + ((Math.floor(t * 4) + i) % 5), 1, "#7fb3ff");
+  rect(x - 2, y, 14, 1, "#9aa3ad");
 }
 
 function plant(x, y) {
   rect(x, y - 6, 8, 6, "#b5653e");
   rect(x + 1, y - 7, 6, 1, "#c9784d");
-  const leaves = [[3, -12], [0, -10], [6, -11], [2, -15], [5, -14], [-1, -13], [7, -9]];
-  for (const [dx, dy] of leaves) rect(x + dx, y + dy, 2, 3, dx % 2 ? "#3f8a52" : "#58a868");
-}
-
-// Lines of code on a dark screen, scrolling up.
-function code(x, y, w, h, t, speed = 5) {
-  const colors = ["#7fb3ff", "#e6c35c", "#9bd18a", "#e9a582", "#c792ea", "#9198a1"];
-  const off = (t * speed) % 3;
-  for (let i = 0; i < Math.floor(h / 3) + 1; i++) {
-    const row = i + Math.floor(t * speed / 3);
-    const yy = y + i * 3 - off;
-    if (yy < y || yy > y + h - 2) continue;
-    const indent = Math.floor(hash(row, 1) * 3) * 2;
-    let xx = x + 1 + indent;
-    for (let k = 0; k < 3; k++) {
-      const len = 2 + Math.floor(hash(row, k) * 6);
-      if (xx + len > x + w - 1) break;
-      rect(xx, yy, len, 1, colors[Math.floor(hash(row, k + 5) * colors.length)]);
-      xx += len + 1;
-    }
-  }
+  for (const [dx, dy] of [[3, -12], [0, -10], [6, -11], [2, -15], [5, -14], [-1, -13], [7, -9]]) rect(x + dx, y + dy, 2, 3, dx % 2 ? "#3f8a52" : "#58a868");
 }
 
 // The 3U CubeSat, standing up: solar cells in a gold frame. open: 0..1 unfolds the wings.
-function cubesat(x, y, open = 0, led = false) {
-  rect(x, y, 8, 22, "#c9a24a");
-  rect(x + 1, y + 1, 6, 20, "#1c2a4e");
+function cubesat(x, y, open = 0, led = false, small = false) {
+  const w = small ? 6 : 8;
+  const h = small ? 16 : 22;
+  const cell = small ? 5 : 7;
+  rect(x, y, w, h, "#c9a24a");
+  rect(x + 1, y + 1, w - 2, h - 2, "#1c2a4e");
   for (let j = 0; j < 3; j++) {
-    rect(x + 1, y + 1 + j * 7, 6, 6, "#22356a");
-    rect(x + 1, y + 4 + j * 7, 6, 1, "#34508c");
-    rect(x + 4, y + 1 + j * 7, 1, 6, "#34508c");
+    rect(x + 1, y + 1 + j * cell, w - 2, cell - 1, "#22356a");
+    rect(x + 1, y + 1 + j * cell + Math.floor(cell / 2), w - 2, 1, "#34508c");
   }
-  if (led) px(x + 6, y + 2, "#ff5a4f");
+  if (led) px(x + w - 2, y + 2, "#ff5a4f");
   const wing = Math.round(open * 16);
   if (wing > 0) {
     for (const side of [-1, 1]) {
-      const wx = side < 0 ? x - wing - 1 : x + 9;
-      rect(wx, y + 2, wing, 18, "#c9a24a");
-      rect(wx + (side < 0 ? 1 : 0), y + 3, Math.max(0, wing - 1), 16, "#22356a");
-      for (let k = 3; k < wing - 1; k += 4) rect(wx + (side < 0 ? wing - 1 - k : k), y + 3, 1, 16, "#34508c");
-      rect(wx, y + 11, wing, 1, "#34508c");
-      rect(side < 0 ? x - 1 : x + 8, y + 10, 1, 2, "#c9a24a");
+      const wx = side < 0 ? x - wing - 1 : x + w + 1;
+      rect(wx, y + 2, wing, h - 4, "#c9a24a");
+      rect(wx + (side < 0 ? 1 : 0), y + 3, Math.max(0, wing - 1), h - 6, "#22356a");
+      for (let k = 3; k < wing - 1; k += 4) rect(wx + (side < 0 ? wing - 1 - k : k), y + 3, 1, h - 6, "#34508c");
+      rect(wx, y + Math.floor(h / 2), wing, 1, "#34508c");
     }
   }
+}
+
+// The same satellite lying on its side, for carrying.
+function cubesatFlat(x, y, led = false) {
+  rect(x, y, 16, 6, "#c9a24a");
+  rect(x + 1, y + 1, 14, 4, "#1c2a4e");
+  for (let i = 0; i < 3; i++) {
+    rect(x + 1 + i * 5, y + 1, 4, 4, "#22356a");
+    rect(x + 3 + i * 5, y + 1, 1, 4, "#34508c");
+  }
+  if (led) px(x + 14, y + 1, "#ff5a4f");
 }
 
 function earth(cx, cy, r, t) {
@@ -100,9 +98,108 @@ function stars(t, seed = 1, density = 70) {
   }
 }
 
-// --- 1. Thessaloniki: the waterfront at sunset ---
+// A small agent: a dark squircle with a screen face and copper eyes, hovering a little.
+export function agent(x, y, t, seed = 0, eye = "#DB8A62", body = "#262c36") {
+  const yy = y + Math.round(Math.sin(t * 3 + seed * 1.7));
+  rect(x + 1, yy, 8, 8, body);
+  rect(x, yy + 1, 10, 6, body);
+  rect(x + 1, yy + 1, 7, 1, "#3b4350");
+  rect(x + 1, yy + 1, 1, 5, "#3b4350");
+  rect(x + 2, yy + 2, 6, 4, "#11151b");
+  if (Math.floor(t * 2 + seed * 3.1) % 9 !== 0) {
+    rect(x + 3, yy + 3, 1, 2, eye);
+    rect(x + 6, yy + 3, 1, 2, eye);
+  }
+  px(x + 5, yy - 1, "#4b535d");
+  px(x + 5, yy - 2, eye);
+  rect(x + 3, yy + 8, 4, 2, body);
+}
 
-export function thessaloniki(t) {
+// A speech balloon with a symbol, shown from t0 for len seconds.
+const ICONS = {
+  "!": ["..O..", "..O..", "..O..", ".....", "..O.."],
+  "?": [".OOO.", "....O", "..OO.", ".....", "..O.."],
+  note: ["..OOO", "..O.O", "..O..", "OOO..", "OOO.."],
+  heart: [".O.O.", "OOOOO", "OOOOO", ".OOO.", "..O.."],
+  idea: [".OOO.", "OYYYO", "OYYYO", ".OYO.", "..O.."],
+};
+function balloon(x, y, kind, t0, t, len = 1.6) {
+  const k = t - t0;
+  if (k < 0 || k > len) return;
+  const bx = Math.round(x - 5);
+  const by = Math.round(y - 12 + (k < 0.1 ? 1 : 0));
+  rect(bx + 1, by, 9, 9, "#2a2230");
+  rect(bx, by + 1, 11, 7, "#2a2230");
+  rect(bx + 1, by + 1, 9, 7, "#ffffff");
+  px(bx + 4, by + 9, "#2a2230");
+  px(bx + 5, by + 9, "#2a2230");
+  px(bx + 4, by + 8, "#ffffff");
+  const color = kind === "heart" ? "#e8486a" : kind === "note" ? "#3f7fd0" : kind === "!" ? "#e05a3a" : "#2a2230";
+  ICONS[kind].forEach((row, j) => {
+    for (let i = 0; i < 5; i++) {
+      if (row[i] === "O") px(bx + 3 + i, by + 2 + j, color);
+      if (row[i] === "Y") px(bx + 3 + i, by + 2 + j, "#ffd75e");
+    }
+  });
+}
+
+// Speech gets a slightly wider face than the 3x5 signs, so a name reads at a glance. Each glyph is
+// five rows of its own width; letters without one fall back to the sign font.
+const SPEECH = {
+  H: ["1001", "1001", "1111", "1001", "1001"],
+  E: ["1111", "1000", "1110", "1000", "1111"],
+  Y: ["10001", "01010", "00100", "00100", "00100"],
+  J: ["0011", "0001", "0001", "1001", "0110"],
+  O: ["0110", "1001", "1001", "1001", "0110"],
+  N: ["1001", "1101", "1011", "1001", "1001"],
+  "!": ["1", "1", "1", "0", "1"],
+  " ": ["00", "00", "00", "00", "00"],
+};
+const speechWidth = (str) => [...str].reduce((w, ch) => w + (SPEECH[ch] ? SPEECH[ch][0].length : 3) + 1, -1);
+
+// A speech bubble, typed out letter by letter, its tail on the speaker's head.
+function say(x, y, str, t0, t, len = 1.4) {
+  const k = t - t0;
+  if (k < 0 || k > len) return;
+  const shown = str.slice(0, Math.ceil(clamp(k / 0.35) * str.length));
+  const w = speechWidth(str) + 8;
+  const bx = Math.round(x - w / 2);
+  const by = Math.round(y - 13);
+  rect(bx + 1, by, w - 2, 11, "#2a2230");
+  rect(bx, by + 1, w, 9, "#2a2230");
+  rect(bx + 1, by + 1, w - 2, 9, "#ffffff");
+  rect(x - 1, by + 11, 2, 1, "#2a2230");
+  px(x - 1, by + 12, "#2a2230");
+  rect(x - 1, by + 10, 2, 1, "#ffffff");
+  let cx = bx + 4;
+  for (const ch of shown) {
+    const glyph = SPEECH[ch];
+    if (!glyph) {
+      cx += text(ch, cx, by + 3, "#2a2230") + 2;
+      continue;
+    }
+    glyph.forEach((row, j) => {
+      for (let i = 0; i < row.length; i++) if (row[i] === "1") px(cx + i, by + 3 + j, "#2a2230");
+    });
+    cx += glyph[0].length + 1;
+  }
+}
+
+// Where someone is along [time, x, facing?] keyframes, and whether they are walking.
+function walkPath(keys, t) {
+  if (t <= keys[0][0]) return { x: keys[0][1], moving: false, dir: keys[0][2] ?? "right" };
+  for (let i = 1; i < keys.length; i++) {
+    const [t1, x1, d] = keys[i];
+    const [t0, x0] = keys[i - 1];
+    if (t <= t1) return { x: lerp(x0, x1, (t - t0) / (t1 - t0)), moving: x1 !== x0, dir: d ?? (x1 >= x0 ? "right" : "left") };
+  }
+  const last = keys[keys.length - 1];
+  return { x: last[1], moving: false, dir: last[2] ?? "right" };
+}
+
+// --- 1. Greece: the waterfront at sunset ---
+
+export function greece(t) {
   const cam = t * 4;
   bands(0, 80, ["#1c2a55", "#2c3c70", "#4a4f88", "#755f96", "#a76d92", "#d4808a", "#eb9b80", "#f6bd86"]);
   const sx = 268;
@@ -154,7 +251,6 @@ export function thessaloniki(t) {
     px(x, 85, "#ffd88f");
     px(x, 86, "#f0b46e");
   }
-  // The White Tower.
   const tx = Math.round(46 - cam * 0.6);
   const ty = 104;
   for (let x = 0; x < 26; x++) {
@@ -175,7 +271,6 @@ export function thessaloniki(t) {
   const wave = Math.floor(t * 4) % 2;
   rect(cx + 6, ty - 66 + wave, 5, 3, "#3f6fb5");
   rect(cx + 6, ty - 65 + wave, 5, 1, "#f2efe8");
-  // The Umbrellas.
   const ux = Math.round(196 - cam * 0.6);
   for (const [dx, h, r] of [[0, 34, 9], [7, 44, 11], [15, 28, 8], [22, 40, 10], [30, 31, 9]]) {
     rect(ux + dx, 104 - h, 1, h, "#3b2f45");
@@ -203,148 +298,18 @@ export function thessaloniki(t) {
   };
   stroll(Math.round(260 - t * 3 - cam * 0.9), 124, "#4b3c4c");
   stroll(Math.round(118 - t * 2 - cam * 0.9), 123, "#544351");
-  john(Math.round(lerp(40, 172, ease(t / 6.2))), 131, t, "walk");
+  // A friend coming the other way calls out to him; John turns to wave, then hurries on.
+  const f = walkPath([[0, 240, "left"], [1.0, 170, "left"], [2.2, 170, "left"], [4.0, 30, "left"]], t);
+  person(0, Math.round(f.x), 124, "left", f.moving ? f.x / 48 : t, f.moving ? "walk" : "stand");
+  say(170, 97, "HEY JOHN!", 1.0, t, 1.3);
+  const me = walkPath([[0, 30], [1.0, 100], [1.05, 100, "front"], [2.05, 100, "front"], [2.1, 100], [4.0, greece.exit[0]]], t);
+  const pose = me.moving ? "walk" : me.dir === "front" && t > 1.15 ? "wave" : "stand";
+  john(Math.round(me.x), greece.exit[1], me.dir, me.moving ? me.x / 64 : t, pose);
 }
+// Where John leaves a scene and enters the next, for the push between them: [x, y, speed].
+greece.exit = [290, 131, 100];
 
-// --- 2. First code: Android, MQTT and ESP8266 boards, at night ---
-
-export function firstCode(t) {
-  rect(0, 0, W, 112, "#2a2236");
-  for (let x = 4; x < W; x += 8) rect(x, 0, 1, 112, "#30283c");
-  rect(0, 112, W, 24, "#3a2c2a");
-  for (let y = 116; y < H; y += 6) rect(0, y, W, 1, "#33262a");
-  // Window onto the city at night.
-  rect(222, 16, 72, 56, "#5a4636");
-  bands(19, 69, ["#121a38", "#18214a", "#212b58"], 225, 291);
-  disc(278, 30, 5, "#f3ead0");
-  disc(281, 28, 4, "#18214a");
-  for (let i = 0; i < 30; i++) {
-    const x = 226 + Math.floor(hash(i, 21) * 64);
-    const y = 56 + Math.floor(hash(i, 22) * 12);
-    if (hash(i, Math.floor(t * 1.5)) > 0.25) px(x, y, hash(i, 23) > 0.5 ? "#ffd27a" : "#f6b35f");
-  }
-  rect(257, 19, 1, 50, "#5a4636");
-  rect(225, 43, 66, 1, "#5a4636");
-  // Shelf with books.
-  rect(30, 44, 74, 2, "#5a4030");
-  const spines = ["#b5543c", "#3f6fb5", "#d9a441", "#4f8b5a", "#8a5cc0", "#c9784d", "#2f8aa0"];
-  for (let i = 0, x = 34; x < 90; i++) {
-    const w = 3 + Math.floor(hash(i, 30) * 3);
-    const h = 9 + Math.floor(hash(i, 31) * 6);
-    rect(x, 44 - h, w, h, spines[i % spines.length]);
-    x += w + 1;
-  }
-  plant(92, 44);
-  // Desk lamp and its light.
-  glow(84, 96, 26, "#f5c98a", 0.32);
-  rect(70, 94, 10, 2, "#2c2b33");
-  rect(74, 76, 1, 18, "#2c2b33");
-  rect(74, 75, 9, 1, "#2c2b33");
-  rect(80, 75, 6, 4, "#c9784d");
-  px(83, 79, "#ffe3a3");
-  desk(56, 96, 180);
-  chair(88, 108);
-  // Laptop with code.
-  rect(124, 74, 30, 21, "#4a515c");
-  rect(126, 76, 26, 17, "#0d1220");
-  code(126, 76, 26, 17, t, 6);
-  rect(120, 95, 38, 2, "#9aa3ad");
-  // The phone flips a switch; a message crosses to the board; the LED lights.
-  const period = 1.6;
-  const k = (t % period) / period;
-  const on = Math.floor(t / period) % 2 === 0;
-  rect(162, 80, 9, 16, "#1b1d22");
-  rect(163, 82, 7, 12, "#f2f2f2");
-  rect(164, 86, 5, 3, on ? "#3fae74" : "#b9bec7");
-  px(on ? 167 : 165, 87, "#ffffff");
-  text("LED", 164, 90, "#6e7681");
-  const fly = span(k, 0.05, 0.35);
-  if (fly > 0 && fly < 1) {
-    const mx = lerp(170, 196, fly);
-    const my = 82 - Math.sin(fly * Math.PI) * 14;
-    rect(mx, my, 2, 2, on ? "#3fae74" : "#e9a582");
-  }
-  rect(184, 92, 34, 4, "#e9e3d2");
-  for (let x = 186; x < 216; x += 3) px(x, 93, "#c9c2ae");
-  rect(190, 86, 12, 6, "#1f3557");
-  for (let x = 191; x < 201; x += 2) px(x, 91, "#c9a24a");
-  px(192, 88, "#9aa3ad");
-  const lit = on ? k > 0.35 : k < 0.35;
-  px(210, 90, lit ? "#ff5a4f" : "#5a2a2a");
-  px(210, 89, lit ? "#ff8a7f" : "#5a2a2a");
-  if (lit) glow(210, 89, 6, "#ff5a4f", 0.5);
-  rect(202, 89, 8, 1, "#e05a4f");
-  rect(202, 91, 3, 1, "#4a90e2");
-  john(96, 120, t, "type");
-}
-
-// --- 3. Healthcare: VIDAVO ---
-
-export function healthcare(t) {
-  rect(0, 0, W, 104, "#e4e7ec");
-  for (let x = 0; x < W; x += 16) rect(x, 0, 1, 104, "#dce0e6");
-  rect(0, 104, W, 32, "#b9b2a8");
-  for (let x = 0; x < W; x += 20) rect(x, 104, 1, 32, "#aea69b");
-  // Window: Thessaloniki by day, the White Tower small on the water.
-  rect(14, 12, 108, 70, "#c9ced6");
-  bands(15, 64, ["#8ec0ec", "#a8d0f1", "#c4e0f6"], 17, 119);
-  rect(17, 64, 102, 6, "#5b8fc7");
-  rect(17, 66, 102, 1, "#7aa8d6");
-  for (let i = 0; i < 12; i++) {
-    const bx = 17 + i * 9;
-    const bh = 6 + Math.floor(hash(i, 40) * 12);
-    rect(bx, 70 - bh - 6, 8, bh, hash(i, 41) > 0.5 ? "#e8dcc8" : "#d9cbb4");
-    for (let wy = 70 - bh - 4; wy < 62; wy += 3) px(bx + 2, wy, "#9fb3c8");
-  }
-  rect(62, 56, 3, 8, "#f4ead9");
-  rect(17, 70, 102, 9, "#c9ced6");
-  rect(66, 15, 1, 64, "#c9ced6");
-  // Whiteboard with sticky notes.
-  rect(196, 14, 100, 48, "#f7f8fa");
-  rect(196, 14, 100, 1, "#c9ced6");
-  rect(196, 61, 100, 2, "#aab1bb");
-  const notes = ["#ffe58a", "#ffb3c1", "#b9f0c9", "#bfe0ff"];
-  for (let i = 0; i < 8; i++) rect(204 + (i % 4) * 22, 20 + Math.floor(i / 4) * 18, 12, 11, notes[(i * 3) % 4]);
-  for (let i = 0; i < 5; i++) rect(204, 54 - i, 40 + i * 6, 1, "#3f6fb5");
-  plant(296, 104);
-  desk(120, 98, 170, "#cfd3da", "#b3b9c2");
-  // The monitor: a heartbeat, a pulsing heart, the rate.
-  const mx = 170;
-  const my = 56;
-  rect(mx, my, 70, 42, "#2a2f38");
-  rect(mx + 2, my + 2, 66, 36, "#0f1720");
-  rect(mx + 33, my + 42, 4, 4, "#2a2f38");
-  rect(mx + 26, my + 46, 18, 2, "#2a2f38");
-  const beat = (x) => {
-    const p = ((x + t * 30) % 22) / 22;
-    if (p < 0.05) return -1;
-    if (p < 0.08) return -9;
-    if (p < 0.11) return 5;
-    if (p < 0.16) return 0;
-    if (p > 0.5 && p < 0.6) return -2;
-    return 0;
-  };
-  let prev = beat(0);
-  for (let x = 1; x < 62; x++) {
-    const y = beat(x);
-    const y0 = Math.min(prev, y);
-    const y1 = Math.max(prev, y);
-    rect(mx + 4 + x, my + 16 + y0, 1, y1 - y0 + 1, x > 54 ? "#2f7d54" : "#5ee08a");
-    prev = y;
-  }
-  const big = (t * 1.25) % 1 < 0.18;
-  const hx = mx + 6;
-  const hy = my + 25;
-  const heart = big ? ["01101100", "11111110", "11111110", "01111100", "00111000", "00010000"] : ["0101000", "1111100", "0111000", "0010000"];
-  heart.forEach((row, j) => [...row].forEach((b, i) => b === "1" && px(hx + i - (big ? 1 : 0), hy + j - (big ? 1 : 0), "#ff5d6c")));
-  text(`${72 + Math.round(Math.sin(t * 0.7) * 2)} BPM`, mx + 18, my + 26, "#f0f6fc");
-  for (let i = 0; i < 6; i++) rect(mx + 46 + i * 3, my + 34 - (2 + Math.floor(hash(i, 44) * 6)), 2, 2 + Math.floor(hash(i, 44) * 6), "#79a7e0");
-  john(146, 122, t, "type");
-  chair(138, 110, "#6b7380");
-  person(0, 246, 130, t, t > 1.5 ? "point" : "stand", true);
-}
-
-// --- 4. The lab at SpaceDot, and the throw ---
+// --- 2. The lab at SpaceDot, and the throw ---
 
 export function lab(t) {
   rect(0, 0, W, 100, "#232b40");
@@ -352,47 +317,59 @@ export function lab(t) {
   rect(0, 100, W, 36, "#1b2133");
   for (let x = 0; x < W; x += 16) rect(x, 100, 1, 36, "#20273a");
   rect(0, 100, W, 1, "#2c3550");
-  // Mission poster.
+  for (const x of [60, 160, 260]) {
+    glow(x, 6, 18, "#9fb8ff", 0.25);
+    rect(x - 12, 0, 24, 2, "#cfe0ff");
+  }
   disc(160, 34, 17, "#c9a24a");
   disc(160, 34, 15, "#1c2a4e");
   for (let i = 0; i < 14; i++) px(147 + Math.floor(hash(i, 50) * 26), 22 + Math.floor(hash(i, 51) * 24), "#cfd8f2");
-  cubesat(156, 25, 0.7);
+  cubesat(157, 27, 0.7, false, true);
   text("ACUBESAT", 160 - textWidth("ACUBESAT") / 2, 56, "#c9a24a");
-  // Benches: an oscilloscope, shelves of parts.
-  rect(16, 60, 60, 2, "#3a4560");
-  for (let i = 0; i < 5; i++) rect(20 + i * 11, 50, 8, 10, ["#3f6fb5", "#c9784d", "#4f8b5a", "#d9a441", "#8a5cc0"][i]);
-  rect(250, 72, 44, 26, "#3a4560");
-  rect(254, 76, 22, 14, "#0d1a14");
-  for (let x = 0; x < 21; x++) px(255 + x, 83 + Math.round(Math.sin(x * 0.6 + t * 6) * 4), "#5ee08a");
-  for (let i = 0; i < 3; i++) disc(282, 80 + i * 6, 2, "#8a96b0");
-  // The team behind the clean table, the satellite on it. John lifts it, then throws it up.
-  const grab = 3.0;
-  const toss = 3.4;
-  const cheer = t > 1.8;
-  person(1, 92, 132, t, cheer ? "cheer" : "stand");
-  person(2, 112, 132, t + 0.3, cheer ? "cheer" : "stand");
-  person(0, 134, 132, t + 1.2, cheer ? "cheer" : "stand");
-  john(166, 132, t, t > grab - 0.2 ? "cheer" : "stand", true);
-  person(3, 190, 132, t + 0.6, cheer ? "cheer" : "stand", true);
-  person(4, 212, 132, t + 0.9, cheer ? "cheer" : "stand", true);
-  rect(84, 121, 154, 3, "#dfe5ee");
-  rect(84, 124, 154, 6, "#b8c2d2");
-  rect(84, 130, 154, 1, "#9aa6ba");
-  rect(90, 131, 3, 5, "#9aa6ba");
-  rect(229, 131, 3, 5, "#9aa6ba");
-  if (t < grab) cubesat(150, 99, 0, Math.floor(t * 3) % 2 === 0);
-  else if (t < toss) cubesat(168, Math.round(lerp(99, 80, ease(span(t, grab, toss)))), 0, true);
-  else {
+  rect(16, 62, 60, 2, "#3a4560");
+  for (let i = 0; i < 5; i++) rect(20 + i * 11, 52, 8, 10, ["#3f6fb5", "#c9784d", "#4f8b5a", "#d9a441", "#8a5cc0"][i]);
+  rect(250, 76, 44, 22, "#3a4560");
+  rect(254, 80, 22, 13, "#0d1a14");
+  for (let x = 0; x < 21; x++) px(255 + x, 86 + Math.round(Math.sin(x * 0.6 + t * 6) * 3), "#5ee08a");
+  for (let i = 0; i < 3; i++) disc(282, 82 + i * 5, 2, "#8a96b0");
+  rect(18, 98, 44, 2, "#3a4560");
+  laptop(24, 98, "#0d1220", t, true);
+  laptop(46, 98, "#0d1220", t + 1, true);
+  // The team behind the table, the satellite lying on it. John walks in behind them, takes his
+  // place, lifts the satellite over his head and throws it.
+  const grab = 3.2;
+  const toss = 3.8;
+  const cheer = t > 3.0;
+  const [x0, y0] = lab.entry;
+  const me = walkPath([[1.0, x0], [2.9, 166], [2.95, 166, "front"]], t);
+  const pose = me.moving ? "walk" : t < grab ? "stand" : t < toss + 0.15 ? "lift" : "cheer";
+  john(Math.round(me.x), y0, me.dir, me.moving ? me.x / 48 : t, pose);
+  for (const [who, x, dt] of [[1, 92, 0], [2, 112, 0.3], [0, 134, 1.2], [3, 190, 0.6], [4, 212, 0.9]]) person(who, x, 132, "front", t + dt, cheer ? "cheer" : "stand");
+  rect(84, 127, 154, 2, "#dfe5ee");
+  rect(84, 129, 154, 4, "#b8c2d2");
+  rect(84, 133, 154, 1, "#9aa6ba");
+  rect(90, 134, 3, 2, "#9aa6ba");
+  rect(229, 134, 3, 2, "#9aa6ba");
+  const blink = Math.floor(t * 3) % 2 === 0;
+  if (t < grab) cubesatFlat(142, 121, blink);
+  else if (t < toss) {
+    const k = ease(span(t, grab, grab + 0.4));
+    cubesatFlat(Math.round(lerp(142, 158, k)), Math.round(lerp(121, y0 - 24 - 7, k)), true);
+  } else {
     const k = span(t, toss, toss + 0.7);
-    const y = lerp(80, -40, ease(k));
-    cubesat(Math.round(168 + k * 10), Math.round(y), 0, true);
-    for (let i = 1; i < 5; i++) px(171 + k * 10, Math.round(y) + 22 + i * 4, "#ffd88f");
+    const y = lerp(y0 - 31, -30, ease(k));
+    cubesatFlat(Math.round(158 + k * 6), Math.round(y), true);
+    for (let i = 1; i < 5; i++) px(166 + k * 6, Math.round(y) + 6 + i * 4, "#ffd88f");
   }
 }
+lab.entry = [40, 128, 66];
 
-// --- 5. Orbit ---
+// --- 3. Orbit, and inside the satellite: yeast on a chip, lit, imaged and compressed ---
 
-export function orbit(t) {
+const zoomBuf = typeof OffscreenCanvas !== "undefined" ? new OffscreenCanvas(W, H) : Object.assign(document.createElement("canvas"), { width: W, height: H });
+const zg = zoomBuf.getContext("2d");
+
+function orbitView(t) {
   bands(0, H, ["#03040a", "#05071a", "#080c22", "#0b112b"]);
   stars(t, 3, 90);
   glow(286, 20, 16, "#fff2c6", 0.6);
@@ -404,45 +381,212 @@ export function orbit(t) {
   cubesat(x, y, ease(span(t, 1.8, 2.6)), true);
   const ant = Math.round(ease(span(t, 2.6, 3.0)) * 8);
   if (ant) rect(x + 4, y - ant, 1, ant, "#e8edf5");
-  for (let i = 0; i < 4; i++) {
-    const p = (t - 3.1 - i * 0.55) / 1.6;
-    if (p <= 0 || p >= 1) continue;
-    const r = 6 + p * 40;
-    g.strokeStyle = `rgba(127,212,255,${(1 - p) * 0.9})`;
-    g.lineWidth = 1;
-    g.beginPath();
-    g.arc(x + 4, y + 11, r, Math.PI * 0.15, Math.PI * 0.55);
-    g.stroke();
+  return [x + 4, y + 11];
+}
+
+function payload(t) {
+  rect(0, 0, W, H, "#10141d");
+  for (let x = 0; x < W; x += 20) rect(x, 0, 1, H, "#161b26");
+  for (let y = 0; y < H; y += 20) rect(0, y, W, 1, "#161b26");
+  // The blue light above the chip.
+  const led = span(t, 0.3, 0.6);
+  rect(70, 32, 180, 4, "#2a3550");
+  for (let i = 0; i < 12; i++) rect(74 + i * 15, 33, 6, 2, led > 0 ? "#9fc0ff" : "#3a4560");
+  if (led > 0) {
+    g.globalAlpha = 0.16 * led;
+    g.fillStyle = "#5a8cff";
+    g.fillRect(64, 36, 192, 76);
+    g.globalAlpha = 1;
+  }
+  // The chip: rows of wells on microfluidic channels, a port at each end.
+  for (const x of [58, 262]) {
+    disc(x, 77, 5, "#4b5a70");
+    disc(x, 77, 2.5, "#0e1b26");
+  }
+  rect(64, 42, 192, 70, "#4b5a70");
+  rect(65, 43, 190, 68, "#1a2836");
+  rect(66, 52, 2, 49, "#2c4a60");
+  rect(252, 52, 2, 49, "#2c4a60");
+  rect(58, 76, 8, 2, "#2c4a60");
+  rect(254, 76, 8, 2, "#2c4a60");
+  const glowK = ease(span(t, 0.6, 1.8));
+  for (let r = 0; r < 4; r++) {
+    const wy = 47 + r * 16;
+    rect(66, wy + 5, 188, 2, "#2c4a60");
+    for (let c = 0; c < 12; c++) {
+      const wx = 70 + c * 15;
+      rect(wx + 1, wy, 9, 12, "#0e1b26");
+      rect(wx, wy + 1, 11, 10, "#0e1b26");
+      const expr = hash(c, r, 5);
+      if (glowK > 0) {
+        g.globalAlpha = glowK * (0.2 + expr * 0.55);
+        g.fillStyle = "#3cff8a";
+        g.fillRect(wx + 1, wy + 1, 9, 10);
+        g.globalAlpha = 1;
+      }
+      // Yeast: round cells, some budding a daughter cell.
+      const cells = 2 + Math.floor(hash(c, r, 6) * 2);
+      for (let i = 0; i < cells; i++) {
+        const cx = wx + 1 + Math.floor(hash(c, r, i + 10) * 6);
+        const cy = wy + 1 + Math.floor(hash(c, r, i + 20) * 7);
+        const lit = glowK > 0.3 && hash(c, r, i) < expr + 0.2;
+        const body = lit ? "#b8ffcf" : "#d9d4b0";
+        rect(cx + 1, cy, 2, 4, body);
+        rect(cx, cy + 1, 4, 2, body);
+        px(cx + 1, cy + 1, lit ? "#ffffff" : "#f4efd2");
+        if (t > 1.2 && hash(c, r, i + 30) > 0.6) {
+          rect(cx + 4, cy + 2, 2, 2, body);
+        }
+      }
+    }
+  }
+  // The camera, and the flash when it takes the picture.
+  rect(268, 62, 26, 18, "#2a3140");
+  rect(268, 62, 26, 1, "#3a4252");
+  disc(268, 71, 7, "#3a4252");
+  disc(268, 71, 4, "#0b0f16");
+  px(267, 69, "#9fb8ff");
+  const flash = span(t, 1.9, 2.1);
+  if (flash > 0 && flash < 1) {
+    g.globalAlpha = (1 - flash) * 0.8;
+    rect(0, 0, W, H, "#ffffff");
+    g.globalAlpha = 1;
+  }
+  // The picture is the chip itself: it comes off the camera, gets smaller and coarser until it is
+  // small enough to send, and leaves by the antenna.
+  if (t > 2.1) {
+    const k = ease(span(t, 2.4, 3.2));
+    const w = Math.round(lerp(54, 27, k));
+    const h = Math.round((w * 70) / 192);
+    const x = Math.round(lerp(256, 286, k));
+    const y = Math.round(lerp(12, 8, k));
+    const src = Math.max(3, Math.round(w / lerp(1, 3, k)));
+    zg.clearRect(0, 0, W, H);
+    zg.imageSmoothingEnabled = false;
+    zg.drawImage(art, 65, 43, 190, 68, 0, 0, src, Math.max(1, Math.round((src * 70) / 192)));
+    if (t < 3.3) {
+      rect(x - 1, y - 1, w + 2, h + 2, "#e9edf5");
+      g.imageSmoothingEnabled = false;
+      g.drawImage(zoomBuf, 0, 0, src, Math.max(1, Math.round((src * 70) / 192)), x, y, w, h);
+    } else {
+      const p = ease(span(t, 3.3, 3.8));
+      rect(Math.round(lerp(x, 322, p)), Math.round(lerp(y, -8, p)), 4, 3, "#7dffaa");
+      for (let i = 1; i < 4; i++) px(Math.round(lerp(x, 322, p)) - i * 3, Math.round(lerp(y, -8, p)) + 2 + i * 2, "#3a9a6a");
+    }
   }
 }
 
-// --- 6. Skiing to Ireland ---
+export function orbit(t) {
+  if (t >= 3.8 && t < 7.6) return payload(t - 3.8);
+  const [fx, fy] = orbitView(t >= 7.6 ? 3.0 + (t - 7.6) : t);
+  // The picture goes down to Earth.
+  if (t > 8.2) {
+    for (let i = 0; i < 4; i++) {
+      const p = (t - 8.2 - i * 0.18) / 1.2;
+      if (p <= 0 || p >= 1) continue;
+      const r = 6 + p * 44;
+      for (let a = Math.PI * 0.15; a < Math.PI * 0.55; a += 1.5 / r) px(fx + Math.cos(a) * r, fy + Math.sin(a) * r, p < 0.5 ? "#9fe0ff" : "#4f8fc0");
+    }
+  }
+  // Zoom into the satellite, and back out of it.
+  const z = t < 3.8 ? ease(span(t, 3.0, 3.8)) : 1 - ease(span(t, 7.6, 8.4));
+  if (z > 0) {
+    zg.clearRect(0, 0, W, H);
+    zg.drawImage(art, 0, 0);
+    const s = 1 + z * 7;
+    g.imageSmoothingEnabled = false;
+    g.clearRect(0, 0, W, H);
+    g.drawImage(zoomBuf, fx - fx / s, fy - fy / s, W / s, H / s, 0, 0, W, H);
+  }
+}
+
+// --- 4. Skiing to Ireland ---
 
 const SLOPE = (x) => (x < 200 ? 38 + x * 0.32 : 110);
-const HILLS = (x) => 104 - Math.round(Math.sin((x - 430) * 0.03) * 4 + Math.sin((x - 430) * 0.07) * 2);
+// Green hills by the coast, easing into the flat street of the terrace and the office.
+const HILLS = (x) => 104 - Math.round((Math.max(0, Math.sin((x - 430) * 0.045)) * 6 + Math.sin((x - 430) * 0.13) * 1.5) * clamp((520 - x) / 40));
+const STREET = 506;
+const WALK_Y = (x) => HILLS(x) + Math.round(4 * clamp((x - 496) / 12));
+const TERRACE = 512;
+const OFFICE = 610;
+const OFFICE_DOOR = OFFICE + 32;
+
+// A Georgian house of Dublin: red brick, white sash windows, a coloured door under a fanlight.
+function georgian(x, base, door) {
+  const top = base - 56;
+  rect(x, top, 24, 56, "#a5533f");
+  for (let y = top + 2; y < base; y += 3) rect(x, y, 24, 1, "#924736");
+  for (let y = top; y < base; y += 3) for (let bx = x + ((y - top) % 6 ? 1 : 4); bx < x + 24; bx += 6) px(bx, y + 1, "#924736");
+  for (let i = 0; i < 14; i++) px(x + Math.floor(hash(i, x, 1) * 24), top + Math.floor(hash(i, x, 2) * 56), "#b9614a");
+  rect(x - 1, top - 2, 26, 2, "#e4dccd");
+  rect(x + 16, top - 9, 6, 7, "#9a4b39");
+  rect(x + 16, top - 9, 6, 1, "#7a3a2c");
+  rect(x + 17, top - 11, 1, 2, "#c9784d");
+  rect(x + 20, top - 11, 1, 2, "#c9784d");
+  const sash = (wx, wy, h) => {
+    rect(wx, wy, 7, h, "#f4f1ea");
+    rect(wx + 1, wy + 1, 5, h - 2, "#3d4d60");
+    rect(wx + 1, wy + Math.floor(h / 2), 5, 1, "#f4f1ea");
+    rect(wx + 1, wy + 1, 2, 1, "#5f7590");
+  };
+  for (const wx of [x + 3, x + 14]) {
+    sash(wx, top + 4, 7);
+    sash(wx, top + 15, 11);
+    for (let i = 0; i < 7; i += 2) px(wx + i, top + 25, "#1f1f24");
+    rect(wx, top + 26, 7, 1, "#1f1f24");
+  }
+  sash(x + 14, base - 17, 9);
+  // The door, its fanlight and frame.
+  rect(x + 2, base - 21, 9, 21, "#f4f1ea");
+  rect(x + 3, base - 20, 7, 3, "#cfe0ff");
+  px(x + 3, base - 20, "#f4f1ea");
+  px(x + 9, base - 20, "#f4f1ea");
+  px(x + 6, base - 20, "#f4f1ea");
+  px(x + 4, base - 19, "#f4f1ea");
+  px(x + 8, base - 19, "#f4f1ea");
+  rect(x + 3, base - 16, 7, 15, door);
+  rect(x + 4, base - 15, 2, 5, "#00000022");
+  rect(x + 7, base - 15, 2, 5, "#00000022");
+  rect(x + 4, base - 8, 2, 5, "#00000022");
+  rect(x + 7, base - 8, 2, 5, "#00000022");
+  px(x + 8, base - 9, "#e6c35c");
+  rect(x + 1, base - 1, 11, 1, "#bdb6a9");
+  for (let i = 0; i < 11; i += 2) rect(x + 13 + i, base - 5, 1, 5, "#1f1f24");
+  rect(x + 13, base - 5, 11, 1, "#1f1f24");
+}
+
+function sheep(x, y, t, seed) {
+  const graze = Math.floor(t * 1.5 + seed) % 3 === 0 ? 1 : 0;
+  rect(x, y - 5, 8, 4, "#f4f2ea");
+  rect(x + 1, y - 6, 6, 1, "#f4f2ea");
+  px(x + 2, y - 6, "#ffffff");
+  rect(x + 7, y - 5 + graze, 3, 3, "#2a2a2e");
+  rect(x + 1, y - 1, 1, 2, "#2a2a2e");
+  rect(x + 6, y - 1, 1, 2, "#2a2a2e");
+}
 
 export function ski(t) {
-  const world = 660;
-  // John's path: down the slope, off the edge, over the sea, onto the hills, then walking.
+  const world = 690;
   let jx;
   let jy;
   let pose = "ski";
+  let dir = "right";
   if (t < 2.1) {
     jx = lerp(16, 196, ease(span(t, 0, 2.1)) * 0.6 + span(t, 0, 2.1) * 0.4);
     jy = SLOPE(jx);
   } else if (t < 3.7) {
     const k = span(t, 2.1, 3.7);
-    jx = lerp(196, 452, k);
-    jy = lerp(SLOPE(196), HILLS(452), k) - Math.sin(k * Math.PI) * 62;
+    jx = lerp(196, 456, k);
+    jy = lerp(SLOPE(196), HILLS(456), k) - Math.sin(k * Math.PI) * 62;
   } else {
-    const k = span(t, 3.7, 6);
-    jx = lerp(452, 560, ease(k));
-    jy = HILLS(jx);
-    pose = t > 4.1 ? "walk" : "ski";
+    // Landed in Ireland: he walks past the terrace to the office, and goes in when the door opens.
+    jx = lerp(456, OFFICE_DOOR, span(t, 3.9, 6.4));
+    jy = WALK_Y(jx);
+    pose = t > 3.9 && t < 6.4 ? "walk" : t >= 6.4 ? "stand" : "ski";
+    if (t >= 6.4) dir = "back";
   }
-  const cam = clamp(jx - 130, 0, world - W);
+  const cam = Math.round(clamp(jx - 130, 0, world - W));
   bands(0, 112, ["#4f84cf", "#679ad9", "#86b1e4", "#a9c9ee", "#cde0f5"]);
-  // Far mountains, and the sun.
   disc(250 - cam * 0.1, 26, 7, "#fff4d0");
   g.fillStyle = "#b9c9de";
   g.beginPath();
@@ -450,14 +594,32 @@ export function ski(t) {
   for (let x = 0; x <= W; x += 2) g.lineTo(x, 70 + Math.sin((x + cam * 0.2) * 0.05) * 10 + Math.sin((x + cam * 0.2) * 0.013) * 14);
   g.lineTo(W, 112);
   g.fill();
-  // The sea.
+  // A rainbow over Dublin as he lands.
+  if (t > 3.6) {
+    const grow = ease(span(t, 3.6, 4.4));
+    const cx = 560 - cam;
+    const R = 78;
+    ["#e8486a", "#f39a3a", "#f6d44a", "#5fbf6a", "#4a8fe0", "#8a6ad0"].forEach((c, k) => {
+      const r = R - k * 1.5;
+      for (let x = Math.ceil(cx - r); x <= cx - r + 2 * r * grow; x++) {
+        const y = Math.round(106 - Math.sqrt(Math.max(0, r * r - (x - cx) ** 2)));
+        px(x, y, c);
+        px(x, y + 1, c);
+      }
+    });
+  }
+  // The sea, and the red and white chimneys of Poolbeg on the far shore.
   for (let x = 0; x < W; x++) {
     const wx = x + cam;
-    if (wx < 200 || wx > 470) continue;
+    if (wx < 200 || wx > 450) continue;
     rect(x, 110, 1, 26, "#3d6fb0");
     if ((wx + Math.floor(t * 8)) % 9 < 3) px(x, 110 + ((wx * 7) % 5) * 4, "#7fa8dc");
   }
-  // The slope.
+  for (const cx of [436, 447]) {
+    const x = cx - cam;
+    for (let y = 46; y < 104; y++) rect(x, y, 5, 1, Math.floor((y - 46) / 6) % 2 ? "#f2efe8" : "#d23b2f");
+    rect(x - 1, 44, 7, 2, "#3a3a42");
+  }
   for (let x = 0; x < W; x++) {
     const wx = x + cam;
     if (wx >= 200) continue;
@@ -472,100 +634,204 @@ export function ski(t) {
     rect(tx, ty - 10, 1, 10, "#4a3a32");
     for (let j = 0; j < 4; j++) rect(tx - 3 + j, ty - 9 + j * 2, 7 - j * 2, 2, "#2f5d47");
   }
-  // Ireland: green hills, rain, Dublin, and the office.
+  if (t < 2.1)
+    for (let i = 0; i < 8; i++) {
+      const age = (t * 10 + i) % 8;
+      px(jx - cam - 6 - age * 2, jy - 2 - Math.round(age * 0.6 * hash(i, 4)), age < 4 ? "#ffffff" : "#dfe8f4");
+    }
+  // Ireland: green hills with a stone wall and sheep, then the street.
   for (let x = 0; x < W; x++) {
     const wx = x + cam;
     if (wx < 430) continue;
-    const y = HILLS(wx);
-    rect(x, y, 1, H - y, wx % 13 < 7 ? "#4f9a4a" : "#489043");
-    rect(x, y + 8, 1, H, "#3d7d3c");
+    if (wx < STREET) {
+      const y = HILLS(wx);
+      rect(x, y, 1, H - y, wx % 13 < 7 ? "#4f9a4a" : "#489043");
+      rect(x, y + 8, 1, H, "#3d7d3c");
+      if (hash(wx, 61) > 0.85) px(x, y, "#6cb85a");
+    } else {
+      rect(x, 104, 1, 8, (wx - STREET) % 12 ? "#c4c0b8" : "#aba79f");
+      rect(x, 112, 1, 1, "#8f8b84");
+      rect(x, 113, 1, H - 113, "#6c7078");
+      if ((wx - STREET) % 20 < 10) px(x, 124, "#d9d6cc");
+    }
   }
-  const houses = ["#c2453a", "#3f6fb5", "#e6c35c", "#4f8b5a", "#8a5cc0"];
-  for (let i = 0; i < 5; i++) {
-    const hx = 482 + i * 13 - cam;
-    const hy = HILLS(482 + i * 13);
-    rect(hx, hy - 18, 12, 18, "#a65f45");
-    for (let wy = hy - 15; wy < hy - 6; wy += 5) rect(hx + 2, wy, 2, 3, "#f2efe8"), rect(hx + 8, wy, 2, 3, "#f2efe8");
-    rect(hx + 4, hy - 5, 4, 5, houses[i]);
+  for (let wx = 462; wx < 504; wx += 4) {
+    const x = wx - cam;
+    const y = HILLS(wx) - 3;
+    rect(x, y, 4, 3, (wx / 4) % 2 ? "#b8b4ac" : "#a29e96");
+    px(x + 3, y + 2, "#7f7b74");
   }
-  const spire = 548 - cam;
-  rect(spire, HILLS(548) - 60, 1, 60, "#c9d1dc");
-  const ox = 566 - cam;
-  const oy = HILLS(566);
-  rect(ox, oy - 40, 52, 40, "#9fb8cf");
-  for (let r = 0; r < 6; r++) for (let c = 0; c < 6; c++) rect(ox + 3 + c * 8, oy - 37 + r * 6, 6, 4, (r + c) % 3 ? "#c9dbeb" : "#e3edf6");
-  text("MICROSOFT", ox + 26 - textWidth("MICROSOFT") / 2, oy - 47, "#3a4656");
-  const cloudX = 470 - cam;
-  for (const [dx, dy, r] of [[0, 0, 8], [10, -4, 10], [22, 0, 8], [14, 3, 7]]) disc(cloudX + dx, 22 + dy, r, "#9aa4b5");
-  for (let i = 0; i < 18; i++) {
-    const rx = cloudX - 6 + Math.floor(hash(i, 70) * 36);
-    const ry = 30 + ((t * 60 + hash(i, 71) * 60) % 50);
-    rect(rx, ry, 1, 2, "#7f9bc4");
+  sheep(474 - cam, HILLS(474) - 2, t, 0);
+  sheep(488 - cam, HILLS(488) - 3, t, 2);
+  ["#c2453a", "#2f6fd0", "#2f7a4a", "#e8b83a"].forEach((c, i) => georgian(TERRACE + i * 24 - cam, 104, c));
+  // The office: glass on a concrete frame, a sign, and the door John goes in by.
+  const ox = OFFICE - cam;
+  rect(ox, 50, 64, 54, "#8a96a6");
+  for (let r = 0; r < 6; r++)
+    for (let c = 0; c < 7; c++) {
+      const gx = ox + 2 + c * 9;
+      const gy = 53 + r * 8;
+      rect(gx, gy, 8, 6, "#9fc1dd");
+      if ((r + c) % 4 === 0) rect(gx + 1, gy + 1, 3, 1, "#d8ebf8");
+    }
+  rect(ox - 2, 48, 68, 2, "#6c7888");
+  text("MICROSOFT", ox + 32 - textWidth("MICROSOFT") / 2, 41, "#3a4656");
+  const dx = OFFICE_DOOR - cam - 8;
+  const open = t > 6.6;
+  rect(ox + 18, 74, 28, 2, "#6c7888");
+  rect(dx, 77, 16, 27, "#4f5c6c");
+  rect(dx + 1, 78, 14, 26, open ? "#1e2a36" : "#a9c6de");
+  if (!open) {
+    rect(dx + 8, 78, 1, 26, "#4f5c6c");
+    rect(dx + 2, 79, 2, 1, "#d8ebf8");
   }
-  john(Math.round(jx - cam), Math.round(jy), t, pose);
+  // Irish weather: a rain cloud over the terrace.
+  const cloudX = 530 - cam;
+  for (const [cx2, cy2, r] of [[0, 0, 8], [10, -4, 10], [22, 0, 8], [14, 3, 7]]) disc(cloudX + cx2, 22 + cy2, r, "#9aa4b5");
+  for (let i = 0; i < 18; i++) rect(cloudX - 6 + Math.floor(hash(i, 70) * 36), 30 + ((t * 60 + hash(i, 71) * 60) % 18), 1, 2, "#7f9bc4");
+  if (t < 6.9) john(Math.round(jx - cam), Math.round(jy), dir, pose === "walk" ? jx / 48 : t, pose);
+  return { door: [dx, 77, 16, 27] };
 }
 
-// --- 7. Real-time co-authoring ---
+// --- 5. Real-time co-authoring, in the Dublin office ---
 
 export function coauthor(t) {
-  rect(0, 0, W, 100, "#e9ecf1");
-  rect(0, 100, W, 36, "#c7c2ba");
-  for (let x = 0; x < W; x += 24) rect(x, 100, 1, 36, "#bcb6ad");
-  for (let x = 8; x < 60; x += 10) rect(x, 10, 6, 70, "#d9dee6");
-  for (let x = 260; x < 312; x += 10) rect(x, 10, 6, 70, "#d9dee6");
-  // The shared document on the wall, with four people's cursors in it.
-  const sx = 90;
-  const sy = 10;
-  const cw = 14;
-  const ch = 7;
-  const cols = 10;
-  const rows = 9;
+  rect(0, 0, W, 104, "#e9ecf1");
+  rect(0, 104, W, 32, "#c7c2ba");
+  for (let x = 0; x < W; x += 24) rect(x, 104, 1, 32, "#bcb6ad");
+  rect(230, 14, 76, 56, "#9aa3ad");
+  bands(16, 68, ["#8b98ab", "#9aa7b8", "#aab5c4"], 232, 304);
+  for (let i = 0; i < 9; i++) {
+    const bh = 10 + Math.floor(hash(i, 3) * 18);
+    rect(232 + i * 8, 68 - bh, 7, bh, "#7d8a9c");
+  }
+  for (let i = 0; i < 26; i++) rect(232 + Math.floor(hash(i, 8) * 72), 16 + ((t * 70 + hash(i, 9) * 52) % 52), 1, 3, "#c9d3e0");
+  rect(267, 14, 1, 56, "#9aa3ad");
+  // The shared document on the wall screen, with three people's cursors in it.
+  const sx = 136;
+  const sy = 20;
+  const cols = 8;
+  const rows = 5;
+  const cw = 8;
+  const ch = 6;
   rect(sx - 3, sy - 3, cols * cw + 6, rows * ch + 6, "#1e232b");
   rect(sx, sy, cols * cw, rows * ch, "#f8f9fb");
   rect(sx, sy, cols * cw, ch, "#eef1f5");
   for (let c = 0; c <= cols; c++) rect(sx + c * cw, sy, 1, rows * ch, "#e1e5eb");
   for (let r = 0; r <= rows; r++) rect(sx, sy + r * ch, cols * cw, 1, "#e1e5eb");
-  const people = [
-    ["#DB8A62", "#f8e4d7", 0.0],
-    ["#4a8fe0", "#dbe8f9", 1.7],
-    ["#3fae74", "#d8f1e3", 3.1],
-    ["#9b6ad8", "#ebdff8", 4.6],
-  ];
-  const cell = (i, step) => {
-    const n = hash(i, step, 80);
-    return [Math.floor(n * cols), 1 + Math.floor(hash(i, step, 81) * (rows - 1))];
-  };
-  const STEP = 0.32;
-  const steps = Math.floor(t / STEP);
-  people.forEach(([, tint], i) => {
+  rect(sx + (cols * cw) / 2 - 2, sy + rows * ch + 3, 4, 8, "#9aa3ad");
+  const people = [["#4a8fe0", "#dbe8f9"], ["#DB8A62", "#f8e4d7"], ["#3fae74", "#d8f1e3"]];
+  const STEP = 0.36;
+  const steps = Math.floor(Math.max(0, t - 1.8) / STEP);
+  const cell = (i, s) => [Math.floor(hash(i, s, 80) * cols), 1 + Math.floor(hash(i, s, 81) * (rows - 1))];
+  people.forEach(([color, tint], i) => {
     for (let s = 0; s < steps; s++) {
       const [c, r] = cell(i, s);
       rect(sx + c * cw + 1, sy + r * ch + 1, cw - 1, ch - 1, tint);
-      rect(sx + c * cw + 3, sy + r * ch + 3, 3 + Math.floor(hash(i, s, 82) * 7), 1, "#5b6470");
+      rect(sx + c * cw + 2, sy + r * ch + 3, 2 + Math.floor(hash(i, s, 82) * 4), 1, "#5b6470");
+    }
+    if (t > 1.8) {
+      const [c, r] = cell(i, steps);
+      rect(sx + c * cw + 1, sy + r * ch, 1, ch, color);
+      rect(sx + c * cw + 1, sy + r * ch - 2, 3, 2, color);
     }
   });
-  people.forEach(([color], i) => {
-    const [c0, r0] = cell(i, Math.max(0, steps - 1));
-    const [c1, r1] = cell(i, steps);
-    const k = ease(((t % STEP) / STEP) * 1.6);
-    const x = Math.round(sx + lerp(c0, c1, k) * cw + 2);
-    const y = Math.round(sy + lerp(r0, r1, k) * ch + 1);
-    rect(x, y, 1, ch - 1, color);
-    rect(x, y - 3, 6, 3, color);
-  });
-  // Three of the people, at their laptops.
-  const seats = [[46, 1, "#4a8fe0"], [142, "john", "#DB8A62"], [238, 2, "#3fae74"]];
-  for (const [x, who, color] of seats) {
-    desk(x - 14, 110, 46, "#cfd3da", "#b3b9c2");
-    rect(x + 13, 98, 16, 12, "#3a4048");
-    rect(x + 14, 99, 14, 10, color);
-    rect(x + 11, 110, 20, 1, "#9aa3ad");
-    chair(x - 4, 116, "#6b7380");
-    person(who, x - 6, 126, t + x, "type");
+  rect(18, 46, 70, 40, "#c9ced6");
+  rect(19, 47, 68, 38, "#fbfcfd");
+  rect(18, 86, 70, 2, "#aab1bb");
+  for (let i = 0; i < 9; i++) {
+    const nx = 23 + (i % 5) * 12 + Math.floor(hash(i, 40) * 3);
+    const ny = 51 + Math.floor(i / 5) * 15 + Math.floor(hash(i, 41) * 3);
+    rect(nx, ny, 9, 9, ["#ffe08a", "#f8b4c6", "#a8dcf0", "#c4ecb0"][i % 4]);
+    rect(nx + 2, ny + 3, 5, 1, "#8a8070");
+    rect(nx + 2, ny + 5, 3, 1, "#8a8070");
   }
+  for (let i = 0; i < 3; i++) rect(70 + i * 5, 80, 4, 1, ["#4a8fe0", "#DB8A62", "#3fae74"][i]);
+  plant(300, 104);
+  plant(96, 104);
+  // Three desks: a colleague, John, a colleague, each flagged in their cursor's colour.
+  const me = walkPath([[0.6, 16], [2.4, 142], [4.5, 142], [6.4, coauthor.exit[0]]], t);
+  const seated = t >= 2.4 && t < 4.5;
+  for (const [x, who, color] of [[56, 1, "#4a8fe0"], [142, "john", "#DB8A62"], [228, 2, "#3fae74"]]) {
+    chair(x - 6, 130, "#6b7380");
+    desk(x + 2, 120, 26, 130, "#cfd3da", "#b3b9c2");
+    laptop(x + 9, 120, color);
+    if (who !== "john" || seated) {
+      person(who, x, 130, "right", t + (who === "john" ? 0 : x), "type");
+      rect(x - 1, 98, 1, 5, "#5b6470");
+      rect(x, 98, 4, 3, color);
+    }
+  }
+  if (!seated) john(Math.round(me.x), 130, me.dir, me.x / 48, me.moving ? "walk" : "stand");
 }
+coauthor.exit = [250, 130, 58];
 
-// --- 8. Agent memory, the patent ---
+// --- 6. With customers: their problem, an agent for it ---
+
+export function customers(t) {
+  rect(0, 0, W, 104, "#dfe6ee");
+  rect(0, 104, W, 32, "#c2c8d2");
+  for (let x = 0; x < W; x += 20) rect(x, 104, 1, 32, "#b6bdc8");
+  rect(110, 12, 200, 60, "#a9b4c2");
+  bands(14, 70, ["#8fc0ea", "#a8d0f0", "#c6e2f6"], 112, 308);
+  for (let i = 0; i < 16; i++) {
+    const bx = 112 + i * 12;
+    const bh = 14 + Math.floor(hash(i, 31) * 28);
+    rect(bx, 70 - bh, 10, bh, hash(i, 32) > 0.5 ? "#9fb0c4" : "#8ea2b8");
+    for (let wy = 70 - bh + 3; wy < 68; wy += 4) rect(bx + 2, wy, 6, 1, "#c9d8e8");
+  }
+  rect(210, 12, 2, 60, "#a9b4c2");
+  // John's screen on its stand.
+  rect(30, 64, 30, 20, "#2a2f38");
+  rect(32, 66, 26, 16, "#f8f9fb");
+  for (let i = 0; i < 3; i++) rect(35, 69 + i * 4, 6 + i * 5, 2, ["#DB8A62", "#4a8fe0", "#3fae74"][i]);
+  rect(44, 84, 2, 46, "#4a515c");
+  rect(38, 128, 14, 2, "#4a515c");
+  // The customers behind the table, a cabinet of documents by the wall.
+  const happy = t > 4.9;
+  const folks = [[150, 3], [190, 5], [230, 6]];
+  for (const [x, who] of folks) person(who, x, 132, "front", t + x, happy ? "cheer" : "stand");
+  rect(118, 127, 156, 2, "#8a5a36");
+  rect(118, 129, 156, 4, "#6b4428");
+  rect(122, 133, 3, 3, "#5a3a22");
+  rect(267, 133, 3, 3, "#5a3a22");
+  laptop(124, 127, "#0d1220", t, true);
+  rect(286, 82, 28, 48, "#9aa3ad");
+  for (let i = 0; i < 4; i++) {
+    rect(288, 85 + i * 11, 24, 9, "#b8c0ca");
+    rect(298, 88 + i * 11, 4, 2, "#6b7380");
+  }
+  // They have a problem; John has an idea; three agents fetch what each of them needs.
+  folks.forEach(([x], i) => balloon(x, 104, "?", 1.3 + i * 0.25, t, 1.5));
+  const [x0, y0] = customers.entry;
+  const me = walkPath([[1.0, x0], [1.8, customers.exit[0]]], t);
+  john(Math.round(me.x), y0, "right", me.x / 48, me.moving ? "walk" : t > 2.3 && t < 3.0 ? "point" : "stand");
+  balloon(Math.round(me.x), 103, "idea", 2.4, t, 1.2);
+  folks.forEach(([x], i) => {
+    const t0 = 2.9 + i * 0.15;
+    if (t < t0) return;
+    const out = ease(span(t, t0, t0 + 0.8));
+    const back = ease(span(t, t0 + 1.0, t0 + 1.8));
+    let ax = lerp(124, 292, out);
+    let ay = lerp(114, 90 + i * 11, out) - Math.sin(out * Math.PI) * 18;
+    if (back > 0) {
+      ax = lerp(292, x - 5, back);
+      ay = lerp(90 + i * 11, 114, back) - Math.sin(back * Math.PI) * 22;
+    }
+    if (back < 1) {
+      agent(Math.round(ax), Math.round(ay), t, i);
+      if (back > 0) rect(Math.round(ax) + 10, Math.round(ay) + 3, 5, 6, "#f4f1e8");
+    } else {
+      rect(x - 4, 124, 8, 3, "#f4f1e8");
+      rect(x - 3, 125, 5, 1, "#9aa3ad");
+    }
+  });
+  folks.forEach(([x], i) => balloon(x, 103, "heart", 5.0 + i * 0.12, t, 1.2));
+}
+customers.entry = [40, 131, 55];
+customers.exit = [84, 131];
+
+// --- 7. Agent memory, the patent ---
 
 export function memory(t) {
   rect(0, 0, W, H, "#0d1117");
@@ -577,34 +843,42 @@ export function memory(t) {
     g.stroke();
   }
   for (const y of [92, 98, 106, 117, 131]) rect(0, y, W, 1, "#161c26");
-  // Agents at work across the floor.
+  // The shelf where kept memories settle.
+  glow(271, 52, 40, "#3a4f7a", 0.35);
+  rect(228, 14, 86, 78, "#121822");
+  rect(228, 14, 86, 1, "#2a3444");
   for (let i = 0; i < 6; i++) {
     const lane = 96 + (i % 3) * 10;
-    const x = Math.round(((hash(i, 90) * 200 + t * (14 + i * 3) * (i % 2 ? 1 : -1)) % 200 + 200) % 200 + 90);
+    const x = Math.round(((((hash(i, 90) * 200 + t * (14 + i * 3) * (i % 2 ? 1 : -1)) % 200) + 200) % 200) + 90);
     agent(x, lane, t, i);
     if (i % 2) rect(x + 10, lane + 4, 3, 4, "#e9e3d2");
   }
-  // Memories rise from them, each with a face and what it holds, and settle onto the shelf.
-  const shelfX = 236;
-  for (let i = 0; i < 9; i++) {
-    const born = i * 0.45;
+  for (let i = 0; i < 10; i++) {
+    const born = i * 0.42;
     const k = span(t, born, born + 1.6);
     if (k <= 0) continue;
     const startX = 110 + hash(i, 91) * 110;
     const slot = i % 5;
-    const dropped = i === 2 || i === 6;
-    const x = Math.round(lerp(startX, shelfX + (i > 4 ? 30 : 0), ease(k)));
+    const dropped = i === 2 || i === 7;
+    const x = Math.round(lerp(startX, 234 + (i > 4 ? 40 : 0), ease(k)));
     const y = Math.round(lerp(92, 20 + slot * 14, ease(k)));
-    if (dropped && t > born + 2.2) continue;
+    if (dropped && t > born + 2.0) {
+      const age = t - born - 2.0;
+      if (age < 0.8) for (let p = 0; p < 6; p++) px(x + 4 + p * 3, Math.round(y + 5 - age * 12 - p), "#3d444d");
+      continue;
+    }
     const promoted = !dropped && t > born + 1.6 && i % 3 === 0;
-    rect(x, y, 24, 11, "#1c232c");
-    rect(x, y, 24, 1, promoted ? "#DB8A62" : "#3d444d");
-    rect(x, y + 10, 24, 1, promoted ? "#DB8A62" : "#3d444d");
-    rect(x, y, 1, 11, promoted ? "#DB8A62" : "#3d444d");
-    rect(x + 23, y, 1, 11, promoted ? "#DB8A62" : "#3d444d");
-    rect(x + 2, y + 3, 4, 4, ["#6C9BD2", "#B58BD6", "#7DBB99", "#E9A582"][i % 4]);
-    rect(x + 8, y + 3, 13, 1, "#9198a1");
-    rect(x + 8, y + 6, 9, 1, "#6e7681");
+    const edge = promoted ? "#DB8A62" : "#3d444d";
+    if (promoted) glow(x + 17, y + 5, 12, "#DB8A62", 0.15);
+    rect(x, y, 34, 11, "#1c232c");
+    rect(x, y, 34, 1, edge);
+    rect(x, y + 10, 34, 1, edge);
+    rect(x, y, 1, 11, edge);
+    rect(x + 33, y, 1, 11, edge);
+    disc(x + 5, y + 5, 2.5, ["#6C9BD2", "#B58BD6", "#7DBB99", "#E9A582"][i % 4]);
+    rect(x + 10, y + 3, 15, 1, "#9198a1");
+    rect(x + 10, y + 6, 9, 1, "#6e7681");
+    rect(x + 27, y + 6, 4, 1, "#4f5864");
   }
   // John at the console, tuning what gets kept.
   rect(30, 84, 44, 26, "#1c232c");
@@ -614,42 +888,42 @@ export function memory(t) {
     const level = 0.5 + Math.sin(t * 1.3 + i * 1.7) * 0.4;
     rect(34 + i * 9, 88 + Math.round(level * 12), 5, 2, i === 1 ? "#DB8A62" : "#9198a1");
   }
-  john(76, 130, t, "point", true);
-  // An idea, then the patent.
-  if (t > 3.4) {
-    const p = ease(span(t, 3.4, 3.8));
-    glow(82, 92 - 10, Math.round(8 * p), "#ffd86b", 0.6);
-    disc(82, 82, 3 * p, "#ffe58a");
-    rect(81, 85, 3, 2, "#c9a24a");
+  const [x0, y0] = memory.entry;
+  const me = walkPath([[0, x0, "left"], [3.8, x0, "left"], [3.85, x0, "right"], [6.2, memory.exit[0]]], t);
+  john(Math.round(me.x), y0, me.dir, me.x / 48, me.moving ? "walk" : me.dir === "left" ? "point" : "stand");
+  if (t > 2.4 && t < 3.8) {
+    const p = ease(span(t, 2.4, 2.8));
+    glow(86, 86, Math.round(9 * p), "#ffd86b", 0.6);
+    disc(86, 86, 3 * p, "#ffe58a");
+    rect(85, 89, 3, 2, "#c9a24a");
   }
-  if (t > 3.9) {
-    const k = ease(span(t, 3.9, 4.4));
-    const dx = Math.round(lerp(330, 150, k));
+  if (t > 2.8) {
+    const k = ease(span(t, 2.8, 3.3));
+    const dx = Math.round(lerp(330, 132, k));
     rect(dx, 14, 46, 60, "#f2efe6");
     rect(dx, 14, 46, 1, "#ffffff");
     for (let i = 0; i < 9; i++) rect(dx + 5, 24 + i * 5, 30 + Math.floor(hash(i, 95) * 8), 1, "#b7b0a2");
     text("PATENT", dx + 5, 17, "#5b5348");
-    if (t > 4.6) {
-      const s = 1 + Math.max(0, 1 - span(t, 4.6, 4.85)) * 0.6;
+    if (t > 3.5) {
       const w = textWidth("EP4651035") + 6;
-      const sx = dx + 23 - (w * s) / 2;
+      const s = 1 + Math.max(0, 1 - span(t, 3.5, 3.75)) * 0.6;
       g.save();
-      g.translate(sx, 52);
+      g.translate(dx + 23 - (w * s) / 2, 52);
       g.scale(s, s);
       g.strokeStyle = "#c2453a";
-      g.lineWidth = 1;
       g.strokeRect(0.5, 0.5, w, 10);
       g.restore();
       text("EP4651035", Math.round(dx + 23 - (w - 6) / 2), 55, "#c2453a");
     }
   }
 }
+memory.entry = [88, 130];
+memory.exit = [250, 130, 69];
 
-// --- 9. Build ---
+// --- 8. Build ---
 
 export function build(t) {
   rect(0, 0, W, H, "#06070d");
-  // Spotlights sweeping the stage.
   for (const [ox, phase] of [[40, 0], [280, 2]]) {
     const a = Math.sin(t * 0.9 + phase) * 0.35;
     g.fillStyle = "rgba(160,190,255,0.06)";
@@ -660,11 +934,10 @@ export function build(t) {
     g.closePath();
     g.fill();
   }
-  // The big screen: memory first, then agents handing work to agents.
-  const sx = 118;
+  const sx = 124;
   const sy = 8;
-  rect(sx - 2, sy - 2, 200, 78, "#1c2230");
-  rect(sx, sy, 196, 74, "#0f1626");
+  rect(sx - 2, sy - 2, 196, 78, "#1c2230");
+  rect(sx, sy, 192, 74, "#0f1626");
   const second = t > 2.6;
   text(second ? "BUILD 2025" : "BUILD 2024", sx + 8, sy + 7, "#f0f6fc", 2);
   if (!second) {
@@ -681,70 +954,557 @@ export function build(t) {
     const nodes = [[30, 44], [80, 28], [80, 58], [130, 28], [130, 58], [170, 44]];
     const k = span(t, 2.7, 4.2);
     nodes.forEach(([nx, ny], i) => {
-      if (i > 0) {
-        const [px0, py0] = nodes[i < 3 ? 0 : i < 5 ? i - 2 : 3];
-        g.strokeStyle = k > i / 6 ? "#DB8A62" : "#3d444d";
-        g.beginPath();
-        g.moveTo(sx + px0 + 5, sy + py0 + 4);
-        g.lineTo(sx + nx + 5, sy + ny + 4);
-        g.stroke();
-      }
+      if (i === 0) return;
+      const [px0, py0] = nodes[i < 3 ? 0 : i < 5 ? i - 2 : 3];
+      g.strokeStyle = k > i / 6 ? "#DB8A62" : "#3d444d";
+      g.beginPath();
+      g.moveTo(sx + px0 + 5, sy + py0 + 4);
+      g.lineTo(sx + nx + 5, sy + ny + 4);
+      g.stroke();
     });
     nodes.forEach(([nx, ny], i) => agent(sx + nx, sy + ny, t, i));
   }
-  // The stage, the presenter, the crowd.
   rect(0, 100, W, 10, "#1c2230");
   rect(0, 100, W, 1, "#4a8fe0");
-  const pres = ["#2a3040"];
   glow(209, 92, 16, "#9fb8ff", 0.35);
-  rect(206, 76, 6, 6, pres[0]);
-  rect(204, 82, 10, 12, pres[0]);
-  rect(205, 94, 3, 6, pres[0]);
-  rect(210, 94, 3, 6, pres[0]);
+  rect(206, 76, 6, 6, "#2a3040");
+  rect(204, 82, 10, 12, "#2a3040");
+  rect(205, 94, 3, 6, "#2a3040");
+  rect(210, 94, 3, 6, "#2a3040");
   for (let row = 0; row < 3; row++)
     for (let i = 0; i < 30; i++) {
       const x = i * 11 + (row % 2) * 5 - 4;
       const y = 114 + row * 8 + Math.round(Math.sin(t * 3 + i + row) * (t > 1.2 && t < 2.2 ? 1 : 0));
-      rect(x, y, 7, 6, row === 0 ? "#151a26" : row === 1 ? "#11151f" : "#0c0f17");
-      rect(x - 1, y + 5, 9, 4, row === 0 ? "#151a26" : row === 1 ? "#11151f" : "#0c0f17");
+      const c = row === 0 ? "#151a26" : row === 1 ? "#11151f" : "#0c0f17";
+      rect(x, y, 7, 6, c);
+      rect(x - 1, y + 5, 9, 4, c);
       if (hash(i, row, Math.floor(t * 2)) > 0.93) px(x + 3, y + 2, "#cfe0ff");
     }
-  john(40, 130, t, t > 1.0 && t < 2.4 ? "cheer" : "stand");
+  // John at the side of the stage, watching the screen.
+  const [x0, y0] = build.entry;
+  const me = walkPath([[1.0, x0], [1.4, 60], [1.45, 60, "back"]], t);
+  john(Math.round(me.x), y0, me.dir, me.moving ? me.x / 48 : t, me.moving ? "walk" : t > 1.8 && t < 2.6 ? "cheer" : "stand");
 }
+build.entry = [40, 112, 50];
+build.exit = [60, 112];
 
-// --- 10. ML lead: on top of it all ---
+// --- 9. Open source, at home in the evening: Kodosi on the screen, BoBe on the desk ---
 
-export function lead(t) {
-  bands(0, 104, ["#1c2a55", "#2c3c70", "#4a4f88", "#755f96", "#a76d92", "#d4808a", "#eb9b80", "#f6bd86"]);
-  disc(70, 78, 10, "#ffe8b0");
-  g.fillStyle = "#3a3150";
-  g.beginPath();
-  g.moveTo(0, 104);
-  for (let x = 0; x <= W; x += 2) g.lineTo(x, 96 + Math.sin(x * 0.04) * 3);
-  g.lineTo(W, 104);
-  g.fill();
-  rect(0, 104, W, 32, "#2a2440");
-  for (let y = 108; y < H; y += 6) rect(0, y, W, 1, "#312a49");
-  // Agents fly in and stack into a tower: 7, 5, 3.
-  const rowsOf = [7, 5, 3];
-  let n = 0;
-  const base = 128;
-  rowsOf.forEach((count, r) => {
-    for (let i = 0; i < count; i++, n++) {
-      const x = 160 - (count * 12) / 2 + i * 12 + 1;
-      const y = base - 13 - r * 13;
-      const k = ease(span(t, n * 0.09, n * 0.09 + 0.5));
-      if (k <= 0) continue;
-      const wave = span(t, 3.2 + (n % 7) * 0.08, 3.4 + (n % 7) * 0.08) > 0;
-      agent(Math.round(x), Math.round(lerp(-20, y, k)), t * (k < 1 ? 0 : 1), n, wave ? "#ffb784" : "#DB8A62");
-    }
-  });
-  // John on top, then the team around the base.
-  const up = ease(span(t, 1.8, 2.4));
-  if (up > 0) john(154, Math.round(lerp(60, 89, up)), t, t > 3.0 ? "cheer" : "stand");
-  const team = [[26, 0, false], [50, 1, false], [74, 2, false], [236, 3, true], [260, 4, true], [284, 5, true]];
-  for (const [x, who, flip] of team) {
-    const k = ease(span(t, 0.6, 1.6));
-    person(who, Math.round(flip ? lerp(330, x, k) : lerp(-20, x, k)), 131, t + x, k < 1 ? "walk" : t > 3.0 ? "cheer" : "stand", flip);
+// BoBe's ESP32 body: a yellow capsule with stubby arms, a ring antenna and a face on its screen.
+// (x, y) is the bottom left corner, on the desk.
+function bobe(x, y, t, awake, happy) {
+  rect(x + 5, y - 19, 3, 1, "#f07a2a");
+  px(x + 5, y - 18, "#f07a2a");
+  px(x + 7, y - 18, "#f07a2a");
+  rect(x + 5, y - 17, 3, 1, "#f07a2a");
+  px(x + 6, y - 16, "#c9611f");
+  rect(x + 2, y - 15, 9, 15, "#f4b630");
+  rect(x + 1, y - 14, 11, 13, "#f4b630");
+  rect(x + 10, y - 13, 2, 11, "#dc9b22");
+  rect(x + 2, y - 14, 2, 6, "#ffd46a");
+  rect(x, y - 9, 1, 4, "#e2a42a");
+  rect(x + 12, y - 9, 1, 4, "#d0931c");
+  rect(x + 3, y - 13, 7, 7, "#fffaf0");
+  rect(x + 4, y - 12, 5, 5, "#f3e3c6");
+  const blink = Math.floor(t * 2.5) % 7 === 0;
+  if (!awake || blink) {
+    px(x + 4, y - 10, "#3a2a20");
+    px(x + 8, y - 10, "#3a2a20");
+  } else if (happy) {
+    px(x + 4, y - 10, "#3a2a20");
+    px(x + 8, y - 10, "#3a2a20");
+    px(x + 5, y - 11, "#3a2a20");
+    px(x + 7, y - 11, "#3a2a20");
+  } else {
+    rect(x + 4, y - 11, 1, 2, "#3a2a20");
+    rect(x + 7, y - 11, 1, 2, "#3a2a20");
+  }
+  if (awake) {
+    px(x + 3, y - 9, "#f4a0a0");
+    px(x + 9, y - 9, "#f4a0a0");
+    rect(x + 5, y - 8, 2, 1, "#3a2a20");
   }
 }
+
+// Kodosi on a small monitor: a sidebar of terminals, one terminal open, and the copper mark of an
+// agent waiting for input.
+function kodosi(sx, sy, t, waiting) {
+  rect(sx, sy, 26, 16, "#1c1917");
+  rect(sx, sy, 26, 2, "#2a2522");
+  px(sx + 1, sy, "#e0605a");
+  px(sx + 3, sy, "#e6b84a");
+  px(sx + 5, sy, "#5ec77a");
+  rect(sx, sy + 2, 7, 14, "#24201d");
+  rect(sx + 1, sy + 3, 5, 2, "#d08a5f");
+  for (let i = 0; i < 4; i++) {
+    rect(sx + 1, sy + 7 + i * 2, 3, 1, "#6a625b");
+    px(sx + 5, sy + 7 + i * 2, waiting === i ? (Math.floor(t * 4) % 2 ? "#e8955f" : "#7a4a32") : "#5ec77a");
+  }
+  const scroll = Math.floor(t * 3);
+  for (let r = 0; r < 6; r++) {
+    const n = scroll + r;
+    px(sx + 9, sy + 4 + r * 2, hash(n, 8) > 0.4 ? "#5ec77a" : "#d08a5f");
+    rect(sx + 11, sy + 4 + r * 2, 3 + Math.floor(hash(n, 7) * 11), 1, "#d9d2ca");
+  }
+  if (waiting >= 0 && Math.floor(t * 4) % 2 === 0) rect(sx + 22, sy + 3, 2, 2, "#e8955f");
+}
+
+export function openSource(t) {
+  rect(0, 0, W, 104, "#1d2233");
+  for (let x = 0; x < W; x += 16) rect(x, 0, 1, 104, "#21273b");
+  rect(0, 104, W, 32, "#2a2a3a");
+  for (let x = 0; x < W; x += 24) rect(x, 104, 1, 32, "#2f2f40");
+  rect(0, 104, W, 1, "#353548");
+  // The window: a night sky over rooftops.
+  const wx = 186;
+  rect(wx, 16, 74, 62, "#3a3f56");
+  bands(18, 76, ["#0c1130", "#121a42", "#1b2552"], wx + 2, wx + 72);
+  for (let i = 0; i < 22; i++) px(wx + 2 + Math.floor(hash(i, 81) * 70), 18 + Math.floor(hash(i, 82) * 36), hash(i, Math.floor(t * 3)) > 0.3 ? "#cfd8f2" : "#56608a");
+  disc(wx + 58, 28, 5, "#f4ecd0");
+  disc(wx + 60, 27, 4, "#121a42");
+  for (let i = 0; i < 7; i++) {
+    const h = 8 + Math.floor(hash(i, 83) * 12);
+    rect(wx + 2 + i * 10, 76 - h, 10, h, "#0a0d1c");
+    if (hash(i, 84) > 0.4) px(wx + 5 + i * 10, 79 - h, "#f7d48a");
+  }
+  rect(wx + 36, 16, 2, 62, "#3a3f56");
+  rect(wx, 46, 74, 2, "#3a3f56");
+  rect(wx - 2, 78, 78, 3, "#4a4f66");
+  // A shelf: books, a CubeSat model, a board.
+  rect(22, 58, 64, 2, "#5e3e28");
+  for (let i = 0; i < 5; i++) rect(24 + i * 5, 46 + (i % 2) * 2, 4, 12 - (i % 2) * 2, ["#3f6fb5", "#c9784d", "#4f8b5a", "#d9a441", "#8a5cc0"][i]);
+  cubesat(56, 42, 0, false, true);
+  rect(68, 54, 12, 4, "#2f6a4a");
+  for (let i = 0; i < 4; i++) px(69 + i * 3, 55, Math.floor(t * 3 + i) % 4 ? "#a8e0b8" : "#ff5a4f");
+  plant(290, 104);
+  // The desk: Kodosi on the monitor, a keyboard, a mug, BoBe and the lamp.
+  chair(128, 130, "#3a3346");
+  rect(140, 124, 112, 2, "#7a5236");
+  rect(140, 126, 112, 2, "#5e3e28");
+  rect(142, 128, 2, 2, "#5e3e28");
+  rect(248, 128, 2, 2, "#5e3e28");
+  const waiting = t > 1.2 && t < 2.2 ? 1 : t > 3.4 && t < 4.0 ? 2 : -1;
+  rect(166, 121, 4, 3, "#3a3f4a");
+  rect(162, 123, 12, 1, "#3a3f4a");
+  rect(154, 103, 28, 18, "#2a2d34");
+  kodosi(155, 104, waiting >= 0 ? 1.2 : t, waiting);
+  glow(168, 112, 16, "#d08a5f", 0.12);
+  rect(142, 123, 12, 1, "#8a919c");
+  rect(190, 119, 5, 5, "#e8e2da");
+  px(195, 120, "#e8e2da");
+  px(195, 122, "#e8e2da");
+  glow(238, 116, 18, "#ffd88f", 0.3);
+  rect(232, 122, 8, 2, "#c9a46a");
+  for (let i = 0; i < 8; i++) px(236 + Math.floor(i / 2), 121 - i * 2, "#a8864e");
+  rect(236, 102, 9, 3, "#c9a46a");
+  rect(237, 105, 7, 1, "#ffe8b0");
+  const awake = t > 2.6;
+  const happy = t > 4.2;
+  bobe(204, 124, t, awake, happy);
+  balloon(210, 101, "idea", 3.0, t, 1.1);
+  balloon(210, 101, "heart", 4.3, t, 1.4);
+  // John at the desk, answering the agents that wait for him; then up and on.
+  const [x0, y0] = openSource.entry;
+  if (t < 4.6) john(x0, y0, "right", waiting >= 0 ? t * 1.6 : t, "type");
+  else {
+    const me = walkPath([[4.7, x0], [6.4, openSource.exit[0]]], t);
+    john(Math.round(me.x), y0, "right", me.x / 48, me.moving ? "walk" : "stand");
+  }
+}
+openSource.entry = [134, 130];
+openSource.exit = [250, 130, 68];
+
+// --- 10. Building agents with the team: a brain, then tools, then it wakes up ---
+
+function tool(kind, x, y) {
+  x = Math.round(x);
+  y = Math.round(y);
+  if (kind === "wrench") {
+    rect(x + 1, y, 1, 2, "#c4ccd6");
+    rect(x + 4, y, 1, 2, "#c4ccd6");
+    rect(x + 1, y + 2, 4, 2, "#c4ccd6");
+    rect(x + 2, y + 4, 2, 5, "#9aa3ad");
+  } else if (kind === "lens") {
+    rect(x + 1, y, 4, 1, "#e6c35c");
+    rect(x, y + 1, 1, 4, "#e6c35c");
+    rect(x + 5, y + 1, 1, 4, "#e6c35c");
+    rect(x + 1, y + 5, 4, 1, "#e6c35c");
+    rect(x + 1, y + 1, 4, 4, "#bfe2fa");
+    px(x + 2, y + 2, "#ffffff");
+    rect(x + 5, y + 6, 2, 2, "#8a5a36");
+  } else if (kind === "doc") {
+    rect(x, y, 6, 8, "#f4f1e8");
+    px(x + 5, y, "#c9c4b8");
+    for (let i = 0; i < 3; i++) rect(x + 1, y + 2 + i * 2, 4 - (i % 2), 1, "#7f8a99");
+  } else {
+    rect(x, y, 9, 5, "#1c232c");
+    rect(x, y, 9, 1, "#DB8A62");
+    rect(x + 1, y + 2, 2, 2, "#7DBB99");
+    rect(x + 4, y + 2, 4, 1, "#9198a1");
+  }
+}
+
+const BRAIN = [".PPPPPP.", "PPpPPpPP", "PpPPPPpP", "PPPpPPPP", "PPpPPpPP", ".PPPPPP."];
+function brain(x, y, small = false) {
+  const rows = small ? ["PPpPPp", "pPPpPP", "PPPPpP"] : BRAIN;
+  rows.forEach((row, j) => {
+    for (let i = 0; i < row.length; i++) if (row[i] !== ".") px(Math.round(x) + i, Math.round(y) + j, row[i] === "P" ? "#f28fb4" : "#c2577f");
+  });
+}
+
+// The agent: a glass dome for its brain, a screen face, and the tools it is given.
+function robot(x, y, t, { hasBrain, on, tools, happy }) {
+  const l = Math.round(x - 9);
+  const top = Math.round(y - 24) - (happy ? Math.round(Math.abs(Math.sin(t * 7)) * 2) : 0);
+  rect(l + 5, top, 8, 4, "#cfe3f4");
+  rect(l + 4, top + 1, 10, 3, "#cfe3f4");
+  px(l + 5, top + 1, "#ffffff");
+  if (hasBrain) brain(l + 6, top + 1, true);
+  rect(l + 2, top + 4, 14, 9, "#2f3642");
+  rect(l + 2, top + 4, 14, 1, "#465062");
+  rect(l + 4, top + 6, 10, 5, "#11151b");
+  if (on) {
+    if (happy) {
+      for (const ex of [l + 6, l + 10]) {
+        px(ex, top + 8, "#DB8A62");
+        px(ex + 1, top + 7, "#DB8A62");
+        px(ex + 2, top + 8, "#DB8A62");
+      }
+    } else if (Math.floor(t * 2) % 7 !== 0) {
+      rect(l + 6, top + 7, 2, 3, "#DB8A62");
+      rect(l + 10, top + 7, 2, 3, "#DB8A62");
+    }
+  }
+  rect(l + 1, top + 7, 1, 3, "#465062");
+  rect(l + 16, top + 7, 1, 3, "#465062");
+  rect(l + 4, top + 13, 10, 7, "#2f3642");
+  rect(l + 4, top + 13, 10, 1, "#465062");
+  rect(l + 7, top + 15, 4, 3, on ? "#3cd27a" : "#1b2028");
+  rect(l + 2, top + 14, 2, 5, "#465062");
+  const wave = happy && Math.floor(t * 5) % 2;
+  rect(l + 14, top + (wave ? 10 : 14), 2, 5, "#465062");
+  rect(l + 5, top + 20, 3, 3, "#465062");
+  rect(l + 10, top + 20, 3, 3, "#465062");
+  rect(l + 4, top + 23, 4, 1, "#20252e");
+  rect(l + 10, top + 23, 4, 1, "#20252e");
+  const bob = Math.round(Math.sin(t * 3));
+  if (tools > 0) tool("wrench", l + 14, top + (wave ? 2 : 6));
+  if (tools > 1) tool("lens", l - 5, top + 10);
+  if (tools > 2) tool("doc", l - 7, top - 2 + bob);
+  if (tools > 3) tool("card", l + 17, top - 1 - bob);
+}
+
+// Where each tool goes on the robot, relative to its feet, for the flight.
+const SLOTS = [["wrench", 5, -18], ["lens", -14, -14], ["doc", -16, -26], ["card", 8, -25]];
+
+// A rounded block with a light top-left edge, for the close-up robot.
+function block(x, y, w, h, face, light, edge) {
+  rect(x + 1, y, w - 2, h, edge);
+  rect(x, y + 1, w, h - 2, edge);
+  rect(x + 1, y + 1, w - 2, h - 2, face);
+  rect(x + 2, y + 1, w - 4, 1, light);
+  rect(x + 1, y + 2, 1, h - 4, light);
+}
+
+const BIG_BRAIN = [
+  "....PPPPPPPPPPPPPP....",
+  "..PPPpPPPPPpPPPPPPPP..",
+  ".PPpPPPPpPPPPPpPPPpPP.",
+  "PPPPPpPPPPpPPPPPpPPPPP",
+  "PpPPPPPpPPPPpPPPPPPpPP",
+  "PPPpPPPPPPpPPPPpPPPPPP",
+  "PPPPPPpPPPPPPpPPPPpPPP",
+  ".PPpPPPPpPPPPPPPpPPPP.",
+  "..PPPPpPPPPpPPPPPPPP..",
+  "....PPPPPPPPPPPPPP....",
+];
+
+// The close-up: the brain goes into the dome, the eyes come on, the tools arrive one by one and
+// each lights the wire back to the brain.
+function robotClose(c, t) {
+  rect(0, 0, W, 116, "#e4e8ee");
+  rect(0, 14, 104, 90, "#d8c39a");
+  for (let y = 20; y < 100; y += 8) for (let x = 6; x < 100; x += 8) rect(x, y, 2, 2, "#b9a477");
+  rect(232, 18, 88, 62, "#c9ced6");
+  rect(234, 20, 86, 58, "#fbfcfd");
+  for (let i = 0; i < 4; i++) rect(244, 30 + i * 11, 40 + (i % 2) * 18, 2, "#d5dae2");
+  rect(0, 116, W, 3, "#9aa6ba");
+  rect(0, 119, W, 17, "#7f8a9c");
+  rect(0, 119, W, 1, "#a9b4c6");
+  const cx = 168;
+  const on = c > 0.6;
+  const happy = c > 2.4;
+  const dark = "#262c36";
+  const light = "#3b4350";
+  const edge = "#151a21";
+  // Legs, body, neck, head.
+  block(cx - 17, 102, 12, 14, dark, light, edge);
+  block(cx + 5, 102, 12, 14, dark, light, edge);
+  block(cx - 21, 70, 42, 34, dark, light, edge);
+  rect(cx - 5, 66, 10, 4, "#3b4350");
+  block(cx - 24, 38, 48, 30, dark, light, edge);
+  // The face, the chest screen and the slots for the tools.
+  rect(cx - 18, 43, 36, 19, "#11151b");
+  if (on) {
+    const blink = !happy && Math.floor(t * 2) % 9 === 0;
+    for (const ex of [cx - 11, cx + 5]) {
+      if (happy) {
+        rect(ex, 52, 2, 2, "#DB8A62");
+        rect(ex + 2, 50, 2, 2, "#DB8A62");
+        rect(ex + 4, 52, 2, 2, "#DB8A62");
+      } else if (blink) rect(ex, 52, 6, 2, "#DB8A62");
+      else {
+        rect(ex + 1, 47, 4, 11, "#DB8A62");
+        rect(ex, 48, 6, 9, "#DB8A62");
+        rect(ex + 1, 48, 2, 3, "#f4c2a6");
+      }
+    }
+    if (c < 0.9) glow(cx, 52, Math.round(26 * (1 - span(c, 0.6, 0.9))) + 4, "#ffd8b8", 0.5);
+  }
+  rect(cx - 9, 76, 18, 11, "#11151b");
+  if (on) {
+    const done = LAUNCH_C.filter((s) => c > s + 0.3).length;
+    for (let i = 0; i < 4; i++) rect(cx - 7 + i * 4, 80, 3, 3, i < done ? "#3cd27a" : "#2a3340");
+  }
+  rect(cx - 8, 92, 16, 2, "#0b0e13");
+  rect(cx + 24, 46, 2, 12, "#0b0e13");
+  // Arms, out to the hands that will hold the tools.
+  block(cx - 29, 72, 8, 8, dark, light, edge);
+  block(cx + 21, 72, 8, 8, dark, light, edge);
+  rect(cx - 33, 80, 6, 14, dark);
+  rect(cx - 33, 80, 1, 14, light);
+  rect(cx + 27, 80, 6, 14, dark);
+  rect(cx + 27, 80, 1, 14, light);
+  block(cx - 35, 93, 9, 6, "#465062", "#5a6474", edge);
+  block(cx + 26, 93, 9, 6, "#465062", "#5a6474", edge);
+  // The glass dome, and the brain lowered into it.
+  for (let j = 0; j < 18; j++) {
+    const half = Math.round(Math.sqrt(Math.max(0, 1 - ((17 - j) / 18) ** 2)) * 17);
+    rect(cx - half, 21 + j, half * 2, 1, "#cfe3f4");
+    px(cx - half, 21 + j, "#8fb3d6");
+    px(cx + half - 1, 21 + j, "#8fb3d6");
+  }
+  rect(cx - 17, 38, 34, 1, "#8fb3d6");
+  const by = Math.round(lerp(-14, 26, ease(span(c, 0, 0.6))));
+  BIG_BRAIN.forEach((row, j) => {
+    for (let i = 0; i < row.length; i++) if (row[i] !== ".") px(cx - 11 + i, by + j, row[i] === "P" ? "#f28fb4" : "#c2577f");
+  });
+  for (let j = 0; j < 7; j++) px(cx - 10 + Math.round(j * 0.6), 25 + j, "#ffffff");
+  // The tools, each brought in from the side, and the wire from the brain to it.
+  const SPOT = [
+    ["wrench", cx + 23, 70, W + 10, 60],
+    ["lens", cx - 47, 86, -20, 86],
+    ["doc", cx - 6, 84, cx - 60, 130],
+    ["card", cx + 22, 49, W + 10, 40],
+  ];
+  SPOT.forEach(([kind, x, y, fromX, fromY], i) => {
+    const s = LAUNCH_C[i];
+    if (c < s) return;
+    const k = ease(span(c, s, s + 0.3));
+    const tx = Math.round(lerp(fromX, x, k));
+    const ty = Math.round(lerp(fromY, y, k));
+    bigTool(kind, tx, ty, k);
+    const pulse = span(c, s + 0.3, s + 0.8);
+    if ((pulse > 0 && pulse < 1) || happy) {
+      const [ax, ay] = [cx, by + 10];
+      const [bx, by2] = [x + 4, y + 4];
+      for (let d = 0; d <= 1; d += 0.04) {
+        const wx = Math.round(lerp(ax, bx, d));
+        const wy = Math.round(lerp(ay, by2, d) - Math.sin(d * Math.PI) * 6);
+        const hot = happy ? (d * 10 + t * 6) % 2 < 0.6 : Math.abs(d - pulse) < 0.12;
+        if (hot) px(wx, wy, "#ffd8b8");
+        else if (d % 0.12 < 0.04) px(wx, wy, "#DB8A62");
+      }
+    }
+  });
+  if (happy) balloon(cx + 34, 30, "heart", 2.45, c, 1.0);
+}
+
+const LAUNCH_C = [0.8, 1.2, 1.6, 2.0];
+
+// The tools at close-up size.
+function bigTool(kind, x, y, k) {
+  if (kind === "wrench") {
+    rect(x + 2, y, 3, 6, "#c4ccd6");
+    rect(x + 9, y, 3, 6, "#c4ccd6");
+    rect(x + 2, y + 5, 10, 5, "#c4ccd6");
+    rect(x + 3, y + 6, 8, 1, "#e9edf2");
+    rect(x + 5, y + 10, 4, 16, "#9aa3ad");
+    rect(x + 5, y + 10, 1, 16, "#c4ccd6");
+  } else if (kind === "lens") {
+    for (let a = 0; a < Math.PI * 2; a += 0.1) {
+      px(x + 8 + Math.round(Math.cos(a) * 7), y + 8 + Math.round(Math.sin(a) * 7), "#e6c35c");
+      px(x + 8 + Math.round(Math.cos(a) * 6), y + 8 + Math.round(Math.sin(a) * 6), "#c9a24a");
+    }
+    disc(x + 8, y + 8, 5, "#bfe2fa");
+    rect(x + 5, y + 5, 3, 2, "#ffffff");
+    for (let i = 0; i < 7; i++) rect(x + 13 + i, y + 13 + i, 3, 3, "#8a5a36");
+  } else if (kind === "doc") {
+    // It slides into the chest slot: only the part above the slot shows once it arrives.
+    const h = Math.round(lerp(16, 6, span(k, 0.7, 1)));
+    rect(x, y + 8 - h, 12, h, "#f4f1e8");
+    for (let i = 0; i < 3; i++) if (y + 10 - h + i * 4 < y + 8) rect(x + 2, y + 10 - h + i * 4, 8 - (i % 2) * 3, 1, "#7f8a99");
+    rect(x - 2, y + 8, 16, 2, "#0b0e13");
+  } else {
+    rect(x, y, 16, 9, "#1c232c");
+    rect(x, y, 16, 1, "#DB8A62");
+    rect(x + 2, y + 3, 4, 4, "#7DBB99");
+    rect(x + 8, y + 3, 6, 1, "#9198a1");
+    rect(x + 8, y + 5, 4, 1, "#6e7681");
+  }
+}
+
+export function workshop(t) {
+  if (t >= 2.6 && t < 5.2) return robotClose(t - 2.6, t);
+  rect(0, 0, W, 104, "#e4e8ee");
+  rect(0, 104, W, 32, "#c3c7cf");
+  for (let x = 0; x < W; x += 20) rect(x, 104, 1, 32, "#b8bcc5");
+  for (const x of [70, 160, 250]) {
+    rect(x - 14, 0, 28, 2, "#ffffff");
+    glow(x, 4, 16, "#ffffff", 0.3);
+  }
+  // A pegboard of tools on the left, a whiteboard with the plan on the right.
+  rect(16, 44, 78, 46, "#d8c39a");
+  for (let y = 47; y < 88; y += 4) for (let x = 19; x < 92; x += 4) px(x, y, "#b9a477");
+  rect(16, 44, 78, 1, "#c4ad80");
+  rect(22, 52, 2, 14, "#7a5236");
+  rect(19, 50, 8, 3, "#8a919c");
+  rect(32, 50, 1, 18, "#c2453a");
+  rect(31, 66, 3, 4, "#3a3a42");
+  rect(52, 50, 12, 2, "#8a919c");
+  for (let i = 0; i < 5; i++) px(52 + i * 2, 52, "#8a919c");
+  for (let i = 0; i < 4; i++) rect(22 + i * 18, 76, 14, 10, ["#3f6fb5", "#c9784d", "#4f8b5a", "#d9a441"][i]);
+  rect(222, 22, 82, 44, "#c9ced6");
+  rect(223, 23, 80, 42, "#fbfcfd");
+  brain(232, 38);
+  for (const [kind, x, y] of [["wrench", 262, 28], ["lens", 262, 42], ["doc", 282, 28], ["card", 280, 44]]) {
+    rect(242, 41, kind === "wrench" || kind === "lens" ? 16 : 34, 1, "#9aa3ad");
+    tool(kind, x, y);
+  }
+  rect(222, 66, 82, 2, "#aab1bb");
+  // The bench, the team behind it, John walking in to join them.
+  const [x0, y0] = workshop.entry;
+  const me = walkPath([[1.0, x0], [2.2, 150], [2.25, 150, "front"], [6.0, 150, "front"], [6.05, 150], [7.4, workshop.exit[0]]], t);
+  const done = t >= 5.2;
+  const pose = me.moving ? "walk" : me.dir === "front" ? (t < 2.6 && t > 2.25 ? "lift" : done && t < 6.0 ? "cheer" : "stand") : "stand";
+  john(Math.round(me.x), y0, me.dir, me.moving ? me.x / 48 : t, pose);
+  for (const [who, x] of [[1, 112], [3, 132], [2, 206], [6, 228]]) person(who, x, 132, "front", t + x, done ? "cheer" : "stand");
+  rect(96, 127, 148, 2, "#9aa6ba");
+  rect(96, 129, 148, 4, "#7f8a9c");
+  rect(100, 133, 3, 3, "#6c7686");
+  rect(237, 133, 3, 3, "#6c7686");
+  // The agent on the bench: empty before the close-up, finished and waving after it.
+  const RX = 172;
+  robot(RX, 127, t, { hasBrain: done, on: done, tools: done ? 4 : 0, happy: done });
+  if (t < 2.25) brain(146, 121);
+  else if (!done) brain(146, lerp(121, 96, ease(span(t, 2.25, 2.55))));
+  balloon(RX, 96, "heart", 5.4, t, 1.4);
+}
+workshop.entry = [40, 128, 60];
+workshop.exit = [250, 128, 70];
+
+// --- 11. Zürich: the lake, the Alps, and work ---
+
+export function zurich(t) {
+  bands(0, 78, ["#24345f", "#38497c", "#5c6298", "#8f78a8", "#c48ca2", "#e8a48e", "#f4c89a"]);
+  // The Alps across the lake, their snow pink with the last light: each column is the highest of a
+  // few peaks, the faces turned to the sunset lit, the others in shade.
+  const PEAKS = [[18, 24, 30], [64, 36, 34], [104, 28, 26], [148, 44, 38], [196, 32, 30], [236, 40, 32], [284, 30, 34]];
+  const ridge = (x) => {
+    let h = 0;
+    for (const [px0, ph, pw] of PEAKS) h = Math.max(h, ph * (1 - Math.abs(x - px0) / pw));
+    return 78 - h - (h > 6 ? Math.round((hash(Math.floor(x / 3), 4) - 0.5) * 3) : 0);
+  };
+  for (let x = 0; x < W; x++) {
+    const y = ridge(x);
+    const lit = ridge(x + 1) > y || (ridge(x + 1) === y && ridge(x - 1) < y);
+    rect(x, y, 1, 78 - y, lit ? "#8e96c0" : "#6f78a6");
+    if (y < 60) {
+      const depth = Math.round((60 - y) * 0.7);
+      rect(x, y, 1, depth, lit ? "#ffe4dc" : "#e9b9bf");
+      px(x, y, lit ? "#fff4ee" : "#f2cdd0");
+    }
+  }
+  g.fillStyle = "#5f6890";
+  g.beginPath();
+  g.moveTo(0, 78);
+  for (let x = 0; x <= W; x += 2) g.lineTo(x, 70 - Math.round(Math.sin(x * 0.035 + 0.6) * 3 + Math.sin(x * 0.09) * 2));
+  g.lineTo(W, 78);
+  g.fill();
+  // The lake, a steamer, swans.
+  bands(78, 106, ["#5a5f92", "#6a6aa0", "#7a72a6", "#6a6a9c"]);
+  for (let i = 0; i < 30; i++) {
+    const x = (hash(i, 7) * W + t * 2 * (0.5 + hash(i, 9))) % W;
+    if (hash(i, Math.floor(t * 2)) > 0.4) rect(x, 82 + Math.floor(hash(i, 8) * 22), 3, 1, "#9a8fc0");
+  }
+  const bx = Math.round(40 + t * 6);
+  rect(bx, 88, 34, 5, "#f6f3ea");
+  rect(bx + 2, 85, 24, 3, "#f6f3ea");
+  rect(bx + 6, 82, 10, 3, "#e6e0d4");
+  rect(bx, 92, 34, 1, "#3f6fd0");
+  for (let i = 0; i < 6; i++) rect(bx + 4 + i * 4, 86, 2, 1, "#5a6a8a");
+  for (const [sx0, sy0] of [[200, 98], [214, 100], [248, 97]]) {
+    const sxw = Math.round(sx0 + Math.sin(t * 0.8 + sx0) * 3);
+    rect(sxw, sy0, 6, 3, "#ffffff");
+    rect(sxw + 5, sy0 - 4, 1, 4, "#ffffff");
+    px(sxw + 6, sy0 - 4, "#e8913a");
+  }
+  // The old town: the Grossmünster's twin towers, steep roofs.
+  for (const tx of [262, 276]) {
+    rect(tx, 40, 9, 38, "#d9c7a8");
+    rect(tx, 40, 2, 38, "#c4b090");
+    rect(tx - 1, 34, 11, 6, "#3a3448");
+    rect(tx + 3, 30, 3, 4, "#3a3448");
+    rect(tx + 3, 48, 3, 5, "#4a3f3a");
+  }
+  rect(256, 60, 34, 18, "#cdb89a");
+  for (let i = 0; i < 5; i++) {
+    const hx = 290 + i * 7;
+    rect(hx, 58 + (i % 2) * 3, 7, 20, ["#e2c9a0", "#d7b088", "#ead6b2", "#cfa27a", "#e6cfa8"][i]);
+    rect(hx, 56 + (i % 2) * 3, 7, 3, "#8a4a3a");
+  }
+  // A blue tram crosses the bridge behind.
+  rect(0, 70, 120, 6, "#8a7f74");
+  for (let x = 6; x < 120; x += 14) rect(x, 76, 3, 6, "#7a7064");
+  const tram = Math.round(((t * 18) % 170) - 40);
+  rect(tram, 64, 26, 6, "#2f6fd0");
+  rect(tram, 68, 26, 1, "#f2efe8");
+  for (let i = 0; i < 3; i++) rect(tram + 3 + i * 8, 65, 6, 2, "#cfe0ff");
+  rect(tram + 12, 61, 1, 3, "#3a3346");
+  // The quay: trees, a lamp, a bench.
+  rect(0, 104, W, 2, "#b9a88e");
+  rect(0, 106, W, 30, "#8f8378");
+  for (let y = 110; y < H; y += 6) rect(0, y, W, 1, "#9a8e82");
+  for (const x of [30, 120, 290]) {
+    rect(x, 84, 2, 22, "#4a3a32");
+    disc(x + 1, 80, 10, "#2f5a3f");
+    disc(x - 2, 78, 7, "#3c7350");
+  }
+  glow(222, 86, 8, "#ffd88f", 0.4);
+  rect(222, 84, 1, 22, "#3a3346");
+  rect(221, 83, 3, 2, "#3a3346");
+  px(222, 85, "#ffd88f");
+  const a = walkPath([[1.4, 340], [6.0, 40, "left"]], t);
+  person(0, Math.round(a.x), 118, "left", a.x / 48, "walk");
+  rect(150, 113, 34, 2, "#6b4428");
+  rect(152, 115, 2, 9, "#5a3a22");
+  rect(180, 115, 2, 9, "#5a3a22");
+  rect(150, 124, 34, 2, "#8a5a36");
+  rect(150, 126, 34, 1, "#6b4428");
+  rect(152, 127, 2, 3, "#5a3a22");
+  rect(180, 127, 2, 3, "#5a3a22");
+  // John sits down on the bench with his laptop and works; people walk by on the quay.
+  const [x0, y0] = zurich.entry;
+  const me = walkPath([[1.0, x0], [2.9, 162]], t);
+  if (t >= 2.9) {
+    john(162, 128, "right", t, "type");
+    rect(157, 122, 11, 1, "#9aa3ad");
+    for (let i = 0; i < 7; i++) {
+      px(167 + Math.floor(i / 3), 121 - i, "#4a515c");
+      px(166 + Math.floor(i / 3), 121 - i, "#7fb3ff");
+    }
+  } else john(Math.round(me.x), y0, "right", me.x / 48, me.moving ? "walk" : "stand");
+  const b = walkPath([[0, 262], [6.0, 336]], t);
+  person(3, Math.round(b.x), 134, "right", b.x / 48, "walk");
+}
+zurich.entry = [40, 130, 64];

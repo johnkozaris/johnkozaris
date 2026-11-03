@@ -1,5 +1,5 @@
-// Drawing on the 320x136 pixel canvas: rectangles, noise, bands, sprites, a 3x5 font and the
-// dithered fade between scenes.
+// Drawing on the 320x136 pixel canvas: rectangles, noise, bands, sprites, a 3x5 font, the
+// dithered fade and the iris.
 
 export const W = 320;
 export const H = 136;
@@ -108,4 +108,21 @@ export function noise(x, y, seed = 0) {
   const c = hash(xi, yi + 1, seed);
   const d = hash(xi + 1, yi + 1, seed);
   return a + (b - a) * sx + (c - a) * sy + (a - b - c + d) * sx * sy;
+}
+
+// Everything outside a circle goes dark: the iris that closes on someone and opens on them again.
+export function iris(cx, cy, r, c = "#06070d") {
+  g.fillStyle = c;
+  for (let y = 0; y < H; y++) {
+    const d = r * r - (y + 0.5 - cy) ** 2;
+    if (d <= 0) {
+      g.fillRect(0, y, W, 1);
+      continue;
+    }
+    const half = Math.sqrt(d);
+    const x0 = Math.round(cx - half);
+    const x1 = Math.round(cx + half);
+    if (x0 > 0) g.fillRect(0, y, x0, 1);
+    if (x1 < W) g.fillRect(x1, y, W - x1, 1);
+  }
 }
