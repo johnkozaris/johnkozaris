@@ -309,6 +309,12 @@ export function greece(t) {
     px(x + 1, y + 1 - up, "#2a2342");
     px(x + 2, y + up, "#2a2342");
   }
+  // A street sign on the promenade.
+  const nx = Math.round(150 - cam * 0.95);
+  rect(nx, 81, 1, 25, "#3a2f43");
+  rect(nx - 26, 72, 53, 9, "#f2efe8");
+  rect(nx - 25, 73, 51, 7, "#2f5fb0");
+  text("THESSALONIKI", nx - 23, 74, "#ffffff");
   const stroll = (x, y, c) => {
     const step = Math.floor(t * 6 + x) % 2;
     rect(x + 1, y - 13, 3, 3, c);
@@ -352,6 +358,14 @@ export function lab(t) {
   rect(254, 80, 22, 13, "#0d1a14");
   for (let x = 0; x < 21; x++) px(255 + x, 86 + Math.round(Math.sin(x * 0.6 + t * 6) * 3), "#5ee08a");
   for (let i = 0; i < 3; i++) disc(282, 82 + i * 5, 2, "#8a96b0");
+  // The whiteboard: the flight software, layer by layer.
+  rect(204, 16, 94, 50, "#3a4560");
+  rect(205, 17, 92, 48, "#e9edf4");
+  text("FLIGHT SOFTWARE", 251 - textWidth("FLIGHT SOFTWARE") / 2, 20, "#1c2a4e");
+  [["C++", "#c9784d"], ["FREERTOS", "#3f6fb5"], ["CORTEX-M7", "#5a6478"]].forEach(([label, c], i) => {
+    rect(215, 29 + i * 11, 72, 9, c);
+    text(label, 251 - textWidth(label) / 2, 31 + i * 11, "#ffffff");
+  });
   rect(18, 98, 44, 2, "#3a4560");
   laptop(24, 98, "#0d1220", t, true);
   laptop(46, 98, "#0d1220", t + 1, true);
@@ -462,6 +476,7 @@ function payload(t) {
       }
     }
   }
+  text("YEAST LAB ON A CHIP", 160 - textWidth("YEAST LAB ON A CHIP") / 2, 24, "#5a6a8a");
   // The camera, and the flash when it takes the picture.
   rect(268, 62, 26, 18, "#2a3140");
   rect(268, 62, 26, 1, "#3a4252");
@@ -757,6 +772,8 @@ export function coauthor(t) {
   rect(sx, sy, cols * cw, ch, "#eef1f5");
   for (let c = 0; c <= cols; c++) rect(sx + c * cw, sy, 1, rows * ch, "#e1e5eb");
   for (let r = 0; r <= rows; r++) rect(sx, sy + r * ch, cols * cw, 1, "#e1e5eb");
+  rect(sx + 1, sy + 1, cols * cw - 1, ch - 1, "#eef1f5");
+  text("SUPPLY PLAN", sx + 2, sy + 1, "#5b6470");
   rect(sx + (cols * cw) / 2 - 2, sy + rows * ch + 3, 4, 8, "#9aa3ad");
   const people = [["#4a8fe0", "#dbe8f9"], ["#DB8A62", "#f8e4d7"], ["#3fae74", "#d8f1e3"]];
   const STEP = 0.36;
@@ -778,17 +795,18 @@ export function coauthor(t) {
     rect(184, 13, 19, 7, "#d93a3a");
     text("LIVE", 186, 14, "#ffffff");
   }
-  rect(18, 46, 70, 40, "#c9ced6");
-  rect(19, 47, 68, 38, "#fbfcfd");
-  rect(18, 86, 70, 2, "#aab1bb");
-  for (let i = 0; i < 9; i++) {
-    const nx = 23 + (i % 5) * 12 + Math.floor(hash(i, 40) * 3);
-    const ny = 51 + Math.floor(i / 5) * 15 + Math.floor(hash(i, 41) * 3);
+  rect(18, 46, 82, 40, "#c9ced6");
+  rect(19, 47, 80, 38, "#fbfcfd");
+  rect(18, 86, 82, 2, "#aab1bb");
+  text("REAL-TIME EDITING", 59 - textWidth("REAL-TIME EDITING") / 2, 50, "#3a4048");
+  for (let i = 0; i < 12; i++) {
+    const nx = 24 + (i % 6) * 12 + Math.floor(hash(i, 40) * 3);
+    const ny = 57 + Math.floor(i / 6) * 12 + Math.floor(hash(i, 41) * 2);
     rect(nx, ny, 9, 9, ["#ffe08a", "#f8b4c6", "#a8dcf0", "#c4ecb0"][i % 4]);
     rect(nx + 2, ny + 3, 5, 1, "#8a8070");
     rect(nx + 2, ny + 5, 3, 1, "#8a8070");
   }
-  for (let i = 0; i < 3; i++) rect(70 + i * 5, 80, 4, 1, ["#4a8fe0", "#DB8A62", "#3fae74"][i]);
+  for (let i = 0; i < 3; i++) rect(80 + i * 5, 82, 4, 1, ["#4a8fe0", "#DB8A62", "#3fae74"][i]);
   plant(300, 104);
   plant(96, 104);
   // Three desks: a colleague, John, a colleague, each flagged in their cursor's colour.
@@ -825,11 +843,13 @@ export function customers(t) {
     for (let wy = 70 - bh + 3; wy < 68; wy += 4) rect(bx + 2, wy, 6, 1, "#c9d8e8");
   }
   rect(210, 12, 2, 60, "#a9b4c2");
-  // John's screen on its stand.
-  rect(30, 64, 30, 20, "#2a2f38");
-  rect(32, 66, 26, 16, "#f8f9fb");
-  for (let i = 0; i < 3; i++) rect(35, 69 + i * 4, 6 + i * 5, 2, ["#DB8A62", "#4a8fe0", "#3fae74"][i]);
-  rect(44, 84, 2, 46, "#4a515c");
+  // John's slides on a screen stand.
+  rect(16, 48, 58, 38, "#2a2f38");
+  rect(18, 50, 54, 34, "#f8f9fb");
+  text("CUSTOMER", 45 - textWidth("CUSTOMER") / 2, 53, "#2a2f38");
+  text("WORKSHOP", 45 - textWidth("WORKSHOP") / 2, 60, "#DB8A62");
+  for (let i = 0; i < 3; i++) rect(24, 69 + i * 4, 10 + i * 8, 2, ["#DB8A62", "#4a8fe0", "#3fae74"][i]);
+  rect(44, 86, 2, 44, "#4a515c");
   rect(38, 128, 14, 2, "#4a515c");
   // The customers behind the table, a cabinet of documents by the wall.
   const happy = t > 4.9;
@@ -889,8 +909,10 @@ export function memory(t) {
   for (const y of [92, 98, 106, 117, 131]) rect(0, y, W, 1, "#161c26");
   // The shelf where kept memories settle.
   glow(271, 52, 40, "#3a4f7a", 0.35);
-  rect(228, 14, 86, 78, "#121822");
-  rect(228, 14, 86, 1, "#2a3444");
+  rect(228, 4, 86, 88, "#121822");
+  rect(228, 4, 86, 1, "#2a3444");
+  text("AGENT MEMORY", 271 - textWidth("AGENT MEMORY") / 2, 7, "#DB8A62");
+  rect(232, 14, 78, 1, "#2a3444");
   for (let i = 0; i < 6; i++) {
     const lane = 96 + (i % 3) * 10;
     const x = Math.round(((((hash(i, 90) * 200 + t * (14 + i * 3) * (i % 2 ? 1 : -1)) % 200) + 200) % 200) + 90);
@@ -1011,6 +1033,7 @@ export function build(t) {
   }
   rect(0, 100, W, 10, "#1c2230");
   rect(0, 100, W, 1, "#4a8fe0");
+  text("MICROSOFT BUILD", 209 - textWidth("MICROSOFT BUILD") / 2, 103, "#6c9be0");
   glow(209, 92, 16, "#9fb8ff", 0.35);
   rect(206, 76, 6, 6, "#2a3040");
   rect(204, 82, 10, 12, "#2a3040");
@@ -1121,6 +1144,17 @@ export function openSource(t) {
   cubesat(56, 42, 0, false, true);
   rect(68, 54, 12, 4, "#2f6a4a");
   for (let i = 0; i < 4; i++) px(69 + i * 3, 55, Math.floor(t * 3 + i) % 4 ? "#a8e0b8" : "#ff5a4f");
+  // Posters of the two projects on the wall.
+  rect(100, 20, 36, 40, "#3a3f56");
+  rect(101, 21, 34, 38, "#1c1917");
+  text(">", 106, 28, "#e8955f");
+  rect(110, 32, 4, 1, "#e8955f");
+  for (let i = 0; i < 3; i++) rect(106, 36 + i * 4, 10 + Math.floor(hash(i, 86) * 14), 1, "#6a625b");
+  text("KODOSI", 118 - textWidth("KODOSI") / 2, 50, "#e8955f");
+  rect(142, 20, 36, 40, "#3a3f56");
+  rect(143, 21, 34, 38, "#2a1f3d");
+  bobe(153, 44, t, true, false);
+  text("BOBE", 160 - textWidth("BOBE") / 2, 50, "#f4b630");
   plant(290, 104);
   // The desk: Kodosi on the monitor, a keyboard, a mug, BoBe and the lamp.
   chair(128, 130, "#3a3346");
@@ -1422,9 +1456,10 @@ export function workshop(t) {
   for (let i = 0; i < 4; i++) rect(22 + i * 18, 76, 14, 10, ["#3f6fb5", "#c9784d", "#4f8b5a", "#d9a441"][i]);
   rect(222, 22, 82, 44, "#c9ced6");
   rect(223, 23, 80, 42, "#fbfcfd");
-  brain(232, 38);
-  for (const [kind, x, y] of [["wrench", 262, 28], ["lens", 262, 42], ["doc", 282, 28], ["card", 280, 44]]) {
-    rect(242, 41, kind === "wrench" || kind === "lens" ? 16 : 34, 1, "#9aa3ad");
+  text("BUILDING AGENTS", 263 - textWidth("BUILDING AGENTS") / 2, 26, "#3a4048");
+  brain(232, 44);
+  for (const [kind, x, y] of [["wrench", 262, 34], ["lens", 262, 48], ["doc", 282, 34], ["card", 280, 50]]) {
+    rect(242, 47, kind === "wrench" || kind === "lens" ? 16 : 34, 1, "#9aa3ad");
     tool(kind, x, y);
   }
   rect(222, 66, 82, 2, "#aab1bb");
@@ -1491,6 +1526,10 @@ export function zurich(t) {
   rect(bx + 6, 82, 10, 3, "#e6e0d4");
   rect(bx, 92, 34, 1, "#3f6fd0");
   for (let i = 0; i < 6; i++) rect(bx + 4 + i * 4, 86, 2, 1, "#5a6a8a");
+  rect(bx + 29, 77, 1, 8, "#3a3346");
+  rect(bx + 30, 77, 5, 5, "#d52b1e");
+  rect(bx + 32, 78, 1, 3, "#ffffff");
+  rect(bx + 31, 79, 3, 1, "#ffffff");
   for (const [sx0, sy0] of [[200, 98], [214, 100], [248, 97]]) {
     const sxw = Math.round(sx0 + Math.sin(t * 0.8 + sx0) * 3);
     rect(sxw, sy0, 6, 3, "#ffffff");
