@@ -5,7 +5,7 @@ import { wrap, f2, svgDoc } from "./svg";
 export const NAME = "John Kozaris";
 export const ROLE = "Senior Software Engineer at Microsoft";
 export const ABOUT =
-  "I built agent memory and multi-agent orchestration for Copilot Studio, both shown in Satya Nadella's Build keynotes. Before Microsoft, I led the flight software of an ESA-funded nanosatellite.";
+  "I built agent memory and multi-agent orchestration, and led the flight software of a nanosatellite.";
 
 export function heroSvg(l: Look, narrow: boolean): string {
   const W = narrow ? 360 : 860;
