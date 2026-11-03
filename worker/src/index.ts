@@ -1,25 +1,23 @@
-// play.johnkozaris.com: Connect Four against a bot, played from the GitHub profile README.
-// Everyone who visits plays the same board. Each column in the README is a link here; a click
-// drops a piece, the bot answers, and the visitor goes straight back to the profile, whose
-// images now show the new board.
+// play.johnkozaris.com: Orbit, played from the GitHub profile README. Everyone flies the same
+// CubeSat. Each arrow in the README is a link here; a click moves the satellite one step and the
+// visitor goes straight back to the profile, whose board image now shows that step.
 import { DurableObject } from "cloudflare:workers";
-import { ROWS, COLS, VISITOR, BOT, at, height, winLine, botMove } from "./c4";
-import { fresh, type State } from "./state";
-import { columnSvg, statusSvg } from "./render";
+import { freshState, newRun, step, type Dir, type State } from "./orbit";
+import { boardSvg } from "./board";
 
 // BACK_URL is only set by `wrangler dev`, to come back to the local preview.
 type Env = { GAME: DurableObjectNamespace<Game>; BACK_URL?: string };
 
 const PROFILE = "https://github.com/johnkozaris";
-const BACK = `${PROFILE}#user-content-play`;
-const THROTTLE_MS = 1200;
+const BACK = `${PROFILE}#user-content-orbit`;
+const THROTTLE_MS = 600;
 
 export class Game extends DurableObject<Env> {
   private state: State | null = null;
   private lastByIp = new Map<string, number>();
 
   private async load(): Promise<State> {
-    if (!this.state) this.state = (await this.ctx.storage.get<State>("state")) ?? fresh();
+    if (!this.state) this.state = (await this.ctx.storage.get<State>("state")) ?? freshState(Date.now());
     return this.state;
   }
 
@@ -27,40 +25,22 @@ export class Game extends DurableObject<Env> {
     return this.load();
   }
 
-  async move(col: number, ip: string): Promise<void> {
+  async move(dir: Dir, ip: string): Promise<void> {
     const now = Date.now();
     if (now - (this.lastByIp.get(ip) ?? 0) < THROTTLE_MS) return;
     this.lastByIp.set(ip, now);
     if (this.lastByIp.size > 5000) this.lastByIp.clear();
 
-    let s = await this.load();
-    if (s.status !== "playing") s = fresh(s);
-    const row = height(s.board, col);
-    if (row === ROWS) return;
-
-    const place = (c: number, r: number, by: 1 | 2): boolean => {
-      s.board[at(c, r)] = by;
-      s.moves.push({ col: c, row: r, by, at: Date.now() });
-      s.totalMoves++;
-      const line = winLine(s.board, c, r);
-      if (line) {
-        s.status = by === VISITOR ? "visitors" : "bot";
-        s.winLine = line;
-        if (by === VISITOR) s.score.visitors++;
-        else s.score.bot++;
-        return true;
-      }
-      if (s.moves.length === COLS * ROWS) {
-        s.status = "draw";
-        s.score.draws++;
-        return true;
-      }
-      return false;
-    };
-
-    if (!place(col, row, VISITOR)) {
-      const reply = botMove(s.board, 5, 25_000);
-      if (reply >= 0) place(reply, height(s.board, reply), BOT);
+    const s = await this.load();
+    s.moves++;
+    if (s.run.over) {
+      s.runs++;
+      s.run = newRun(s.run.id + 1, now);
+    } else {
+      const before = s.run.kills;
+      s.run = step(s.run, dir, Math.random, now);
+      s.kills += s.run.kills - before;
+      if (s.run.tick > s.best.ticks) s.best = { ticks: s.run.tick, kills: s.run.kills, at: now };
     }
     this.state = s;
     await this.ctx.storage.put("state", s);
@@ -82,21 +62,17 @@ const redirect = (to: string) =>
 
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
-    const { pathname, searchParams } = new URL(req.url);
+    const { pathname } = new URL(req.url);
     if (req.method !== "GET" && req.method !== "HEAD") return new Response(null, { status: 405 });
     if (pathname === "/robots.txt") return new Response("User-agent: *\nDisallow: /\n");
 
-    const game = env.GAME.getByName("shared");
-    let m: RegExpMatchArray | null;
-
-    if ((m = pathname.match(/^\/drop\/([0-6])$/))) {
-      await game.move(Number(m[1]), req.headers.get("cf-connecting-ip") ?? "unknown");
+    const game = env.GAME.getByName("orbit");
+    const m = pathname.match(/^\/move\/(up|down|left|right)$/);
+    if (m) {
+      await game.move(m[1] as Dir, req.headers.get("cf-connecting-ip") ?? "unknown");
       return redirect(env.BACK_URL ?? BACK);
     }
-    if ((m = pathname.match(/^\/col\/([0-6])\.svg$/))) {
-      return svg(columnSvg(await game.snapshot(), Number(m[1]), Date.now()));
-    }
-    if (pathname === "/status.svg") return svg(statusSvg(await game.snapshot(), Date.now(), searchParams.has("narrow")));
+    if (pathname === "/board.svg") return svg(boardSvg((await game.snapshot()) as State, Date.now()));
     if (pathname === "/") return redirect(env.BACK_URL ?? BACK);
     return new Response("Not found", { status: 404 });
   },

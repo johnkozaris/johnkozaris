@@ -1,6 +1,7 @@
 // Renders every SVG in assets/. The daily Action runs it with GITHUB_TOKEN to refresh releases.
 import { looks } from "../shared/theme";
 import { heroSvg } from "./hero";
+import { keySvg } from "../worker/src/board";
 import { PROOFS, proofSvg, productSvg, repoSvg, type Product, type Repo } from "./cards";
 
 const root = new URL("..", import.meta.url).pathname;
@@ -46,6 +47,9 @@ function ago(iso: string, now = Date.now()): string {
 
 const rel = await releases();
 const meta = (langs: string, r: Release) => (r ? [langs, `${r.tag}, ${ago(r.at)}`] : [langs]);
+
+// The arrow keys under the Orbit board; the board itself comes live from play.johnkozaris.com.
+for (const dir of ["up", "down", "left", "right"] as const) await write(`orbit-${dir}.svg`, keySvg(dir));
 
 for (const [mode, look] of Object.entries(looks)) {
   await write(`hero-wide-${mode}.svg`, heroSvg(look, false));
