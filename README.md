@@ -3,8 +3,8 @@
 </p>
 
 <p align="center">
-<a href="https://www.linkedin.com/in/john-kozaris/#gh-dark-mode-only"><picture><source media="(max-width: 600px)" srcset="assets/hero-narrow-dark.svg"><img src="assets/hero-wide-dark.svg" alt="John Kozaris. I like building things that sound a bit too ambitious. I invented long-term memory for AI agents, architected a runtime where agents hand work to each other, and led the flight software of a nanosatellite."></picture></a>
-<a href="https://www.linkedin.com/in/john-kozaris/#gh-light-mode-only"><picture><source media="(max-width: 600px)" srcset="assets/hero-narrow-light.svg"><img src="assets/hero-wide-light.svg" alt="John Kozaris. I like building things that sound a bit too ambitious. I invented long-term memory for AI agents, architected a runtime where agents hand work to each other, and led the flight software of a nanosatellite."></picture></a>
+<a href="https://johnkozaris.com/#gh-dark-mode-only"><picture><source media="(max-width: 600px)" srcset="assets/hero-narrow-dark.svg"><img src="assets/hero-wide-dark.svg" alt="John Kozaris. I like building things that sound a bit too ambitious."></picture></a>
+<a href="https://johnkozaris.com/#gh-light-mode-only"><picture><source media="(max-width: 600px)" srcset="assets/hero-narrow-light.svg"><img src="assets/hero-wide-light.svg" alt="John Kozaris. I like building things that sound a bit too ambitious."></picture></a>
 </p>
 
 <h3 align="center">Open source</h3>
@@ -19,14 +19,6 @@
 <a href="https://github.com/johnkozaris/jko-claude-plugins"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/repo-plugins-dark.svg"><img src="assets/repo-plugins-light.svg" alt="jko-claude-plugins: Claude Code plugin marketplace."></picture></a>
 <a href="https://github.com/johnkozaris/tebis"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/repo-tebis-dark.svg"><img src="assets/repo-tebis-light.svg" alt="tebis: drive AI coding agents running in tmux from Telegram."></picture></a>
 <a href="https://github.com/johnkozaris/mcpHomeManager"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/repo-home-dark.svg"><img src="assets/repo-home-light.svg" alt="mcpHomeManager: self-hosted MCP gateway for homelab services."></picture></a>
-</p>
-
-<h3 align="center">At Microsoft</h3>
-
-<p align="center">
-<a href="https://youtu.be/8OviTSFqucI?t=2861"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/proof-memory-dark.svg"><img src="assets/proof-memory-light.svg" alt="Agentic memory: agents that remember and learn from feedback. Primary inventor. Demo video at 47:41."></picture></a>
-<a href="https://youtu.be/ceV3RsG946s?t=1629"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/proof-orchestration-dark.svg"><img src="assets/proof-orchestration-light.svg" alt="Multi-agent orchestration: agents hand work to each other and run it in parallel. Architect. Demo video at 27:09."></picture></a>
-<a href="https://patents.google.com/patent/EP4651035A2/en"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/proof-patent-dark.svg"><img src="assets/proof-patent-light.svg" alt="Patent EP4651035, Memory Management of AI Agents. Primary inventor."></picture></a>
 </p>
 
 <a name="orbit"></a>
