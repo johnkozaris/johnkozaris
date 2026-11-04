@@ -204,7 +204,8 @@ function blit(rows, pal, x, y, flip) {
 }
 
 // who: "john" or a number; (x, y): the point between the feet. dir: front, back, left, right.
-// pose: stand | walk | cheer | wave | lift | point | sit | type | ski
+// pose: stand | walk | cheer | wave | lift | point | sit | type | ski | carry | coffee
+// (carry walks with a laptop under the arm and a coffee in hand; coffee stands facing you with both)
 export function person(who, x, y, dir = "front", t = 0, pose = "stand") {
   const pal = LOOKS[who];
   const head = HEADS[pal.style];
@@ -220,6 +221,13 @@ export function person(who, x, y, dir = "front", t = 0, pose = "stand") {
     if (pose === "cheer") arms(pal, left, top - hop, 5, [0, 1]);
     if (pose === "lift") arms(pal, left, top, 0, [0, 1]);
     if (pose === "wave") arms(pal, left, top, Math.floor(t * 5) % 2 ? 4 : 7, [1]);
+    if (pose === "coffee") {
+      for (let j = 14; j <= 19; j++) {
+        px(left + 13, top + j, "#9aa3ad");
+        px(left + 14, top + j, "#5a6270");
+      }
+      cup(left + 1, left + 2, top + 14, t);
+    }
     return;
   }
   const flip = dir === "left";
@@ -247,19 +255,40 @@ export function person(who, x, y, dir = "front", t = 0, pose = "stand") {
     px(fx(11), top + 17, pal.S);
     return;
   }
-  const frame = pose === "walk" ? Math.floor(t * 8) % 4 : 0;
+  const frame = pose === "walk" || pose === "carry" ? Math.floor(t * 8) % 4 : 0;
   // The whole figure rises a pixel as the legs pass each other, so nothing comes apart.
   const bob = frame === 2 ? -1 : 0;
   blit(head.side, pal, left, top + bob, flip);
   blit(SIDE_BODY, pal, left, top + 13 + bob, flip);
   const sw = ARM_SWING[frame];
-  if (sw) px(fx(8 + sw), top + 17 + bob, pal.S);
+  if (sw && pose !== "carry") px(fx(8 + sw), top + 17 + bob, pal.S);
   if (pose === "point") {
     for (let i = 10; i <= 13; i++) px(fx(i), top + 15, pal.C);
     px(fx(14), top + 15, pal.S);
     px(fx(14), top + 14, pal.k);
   }
   blit(SIDE_LEGS[frame], pal, left, top + 20 + bob, flip);
+  if (pose === "carry") {
+    for (let i = 4; i <= 10; i++) {
+      px(fx(i), top + 17 + bob, "#9aa3ad");
+      px(fx(i), top + 18 + bob, "#5a6270");
+    }
+    px(fx(11), top + 17 + bob, pal.S);
+    cup(fx(12), fx(13), top + 15 + bob, t);
+  }
+}
+
+// A paper cup of coffee two pixels wide, its steam drifting.
+function cup(a, b, y, t) {
+  px(a, y, "#6b4428");
+  px(b, y, "#6b4428");
+  for (const j of [1, 2]) {
+    px(a, y + j, "#f2efe8");
+    px(b, y + j, "#d8d2c6");
+  }
+  const s = Math.floor(t * 3) % 2;
+  px(s ? a : b, y - 2, "#dfe5ec");
+  px(s ? b : a, y - 3, "#c4ccd6");
 }
 
 function arms(pal, left, top, reach, sides) {

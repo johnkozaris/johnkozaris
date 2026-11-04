@@ -746,7 +746,7 @@ export function ski(t) {
   return { door: [dx, 77, 16, 27] };
 }
 
-// --- 5. Real-time co-authoring, in the Dublin office ---
+// --- 5. Real-time collaborative editing, in the Dublin office ---
 
 export function coauthor(t) {
   rect(0, 0, W, 104, "#e9ecf1");
@@ -828,7 +828,186 @@ export function coauthor(t) {
 }
 coauthor.exit = [250, 130, 58];
 
-// --- 6. With customers: their problem, an agent for it ---
+// --- 6. Talks: Berlin in 2023, Vienna in 2025 ---
+
+export function talks(t) {
+  const vienna = t > 3.3;
+  rect(0, 0, W, H, "#0e1322");
+  for (let x = 0; x < W; x += 22) rect(x, 0, 1, 100, "#121a2c");
+  for (const [ox, phase] of [[60, 0], [250, 1.7]]) {
+    const a = Math.sin(t * 0.8 + phase) * 0.3;
+    g.fillStyle = "rgba(160,190,255,0.05)";
+    g.beginPath();
+    g.moveTo(ox, 0);
+    g.lineTo(126 + a * 120 - 24, 104);
+    g.lineTo(126 + a * 120 + 24, 104);
+    g.closePath();
+    g.fill();
+  }
+  // The conference's banner, and the slide with the city and the year.
+  const banner = vienna ? "EUROPEAN POWER PLATFORM" : "GENAI GURUS";
+  rect(14, 10, 110, 16, "#26304a");
+  rect(15, 11, 108, 14, vienna ? "#6c2f4a" : "#1f4f7a");
+  text(banner, Math.round(69 - textWidth(banner) / 2), 16, "#ffffff");
+  const sx = 150;
+  const sy = 10;
+  rect(sx - 2, sy - 2, 156, 72, "#1c2230");
+  rect(sx, sy, 152, 68, "#f4f1ea");
+  text(vienna ? "VIENNA 2025" : "BERLIN 2023", sx + 8, sy + 8, "#25160e", 2);
+  agent(sx + 14, sy + 36, t, 3);
+  for (let i = 0; i < 3; i++) {
+    rect(sx + 30, sy + 39, 14, 1, "#9aa3ad");
+    rect(sx + 46 + i * 34, sy + 32, 28, 16, ["#f4dec8", "#dbe8f9", "#d8f1e3"][i]);
+    rect(sx + 50 + i * 34, sy + 37, 12 + i * 4, 2, ["#b85a26", "#3d73c7", "#2f7d54"][i]);
+    rect(sx + 50 + i * 34, sy + 41, 8, 2, "#9aa3ad");
+  }
+  for (let i = 0; i < 3; i++) rect(sx + 14, sy + 54 + i * 4, 40 + i * 22, 2, "#d9d2c4");
+  // The stage, the speaker, the lectern in front of him, the room.
+  rect(0, 100, W, 10, "#1c2230");
+  rect(0, 100, W, 1, "#DB8A62");
+  const lx = 126;
+  const [x0, y0] = talks.entry;
+  const me = walkPath([[1.0, x0], [2.1, lx], [2.15, lx, "front"], [5.0, lx, "front"], [5.05, lx], [6.4, talks.exit[0]]], t);
+  const pose = me.moving ? "walk" : me.dir === "front" && ((t > 2.3 && t < 2.9) || (t > 3.6 && t < 4.2)) ? "wave" : "stand";
+  john(Math.round(me.x), y0, me.dir, me.moving ? me.x / 48 : t, pose);
+  rect(lx - 9, 101, 18, 9, "#2a3040");
+  rect(lx - 9, 101, 18, 1, "#4a5878");
+  rect(lx - 6, 103, 12, 5, vienna ? "#6c2f4a" : "#1f4f7a");
+  for (let row = 0; row < 3; row++)
+    for (let i = 0; i < 30; i++) {
+      const x = i * 11 + (row % 2) * 5 - 4;
+      const y = 114 + row * 8 + Math.round(Math.sin(t * 3 + i + row) * (t > 4.4 && t < 5.4 ? 1 : 0));
+      const c = row === 0 ? "#1a2134" : row === 1 ? "#151b2b" : "#0f1422";
+      rect(x, y, 7, 6, c);
+      rect(x - 1, y + 5, 9, 4, c);
+    }
+  say(lx, 85, "HELLO BERLIN!", 2.3, t, 1.0);
+  say(lx, 85, "HELLO VIENNA!", 3.6, t, 1.0);
+  for (const [x, i] of [[60, 0], [182, 1], [248, 2]]) balloon(x, 112, "heart", 4.5 + i * 0.2, t, 1.0);
+}
+talks.entry = [40, 112, 52];
+talks.exit = [210, 112];
+
+// --- 7. A hackathon: building something that helps people, and winning ---
+
+function trophy(x, y) {
+  rect(x, y, 11, 6, "#e6c35c");
+  rect(x + 1, y + 1, 3, 3, "#fff1b8");
+  rect(x - 2, y + 1, 2, 3, "#c9a24a");
+  rect(x + 11, y + 1, 2, 3, "#c9a24a");
+  rect(x + 4, y + 6, 3, 3, "#c9a24a");
+  rect(x + 2, y + 9, 7, 2, "#a8832e");
+}
+
+export function hackathon(t) {
+  const won = t > 3.4;
+  rect(0, 0, W, 104, "#2b2440");
+  for (let x = 0; x < W; x += 20) rect(x, 0, 1, 104, "#30294a");
+  rect(0, 104, W, 32, "#3a3346");
+  for (let x = 0; x < W; x += 24) rect(x, 104, 1, 32, "#40394f");
+  // String lights, the banner, and the winner's banner under it.
+  rect(0, 5, W, 1, "#4a4260");
+  for (let i = 0; i < 27; i++) px(6 + i * 12, 6 + (i % 2), Math.floor(t * 3 + i) % 3 === 0 ? "#fff1b8" : ["#e8486a", "#e6c35c", "#5ec77a", "#5fc8ff"][i % 4]);
+  rect(76, 14, 168, 22, "#1b1730");
+  rect(76, 14, 168, 1, "#4a4260");
+  text("HACKATHON", Math.round(160 - textWidth("HACKATHON", 2) / 2), 20, "#e8955f", 2);
+  if (won) {
+    rect(124, 40, 72, 12, "#e6c35c");
+    text("WINNER", Math.round(160 - textWidth("WINNER") / 2), 43, "#3a2a10");
+  }
+  // Sticky notes on the wall, and the demo on a screen: an app for helping people.
+  rect(14, 44, 58, 40, "#efe8d8");
+  for (let i = 0; i < 8; i++) rect(18 + (i % 4) * 13, 48 + Math.floor(i / 4) * 16, 10, 10, ["#ffe08a", "#f8b4c6", "#a8dcf0", "#c4ecb0"][i % 4]);
+  rect(240, 42, 64, 44, "#1c2230");
+  rect(242, 44, 60, 40, "#f8f9fb");
+  [".O.O.", "OOOOO", "OOOOO", ".OOO.", "..O.."].forEach((row, j) => {
+    for (let i = 0; i < 5; i++) if (row[i] === "O") rect(258 + i * 2, 50 + j * 2, 2, 2, "#e8486a");
+  });
+  rect(250, 66, 44, 6, "#3fae74");
+  rect(250, 75, 30, 2, "#c4ccd6");
+  // The team behind the table: laptops, a pizza, then the trophy.
+  for (const [who, x] of [[2, 112], [6, 136], [1, 186], [4, 210]]) person(who, x, 132, "front", t + x, won ? "cheer" : "stand");
+  const [x0, y0] = hackathon.entry;
+  const me = walkPath([[0, x0, "front"], [5.0, x0, "front"], [5.05, x0], [6.0, hackathon.exit[0]]], t);
+  john(Math.round(me.x), y0, me.dir, me.moving ? me.x / 48 : t, me.moving ? "walk" : won ? "cheer" : "stand");
+  rect(96, 127, 152, 2, "#8a5a36");
+  rect(96, 129, 152, 4, "#6b4428");
+  rect(100, 133, 3, 3, "#5a3a22");
+  rect(241, 133, 3, 3, "#5a3a22");
+  laptop(104, 127, "#0d1220", t, true);
+  laptop(128, 127, "#0d1220", t + 1, true);
+  laptop(200, 127, "#0d1220", t + 2, true);
+  rect(170, 124, 18, 3, "#c9a46a");
+  rect(172, 123, 14, 1, "#e8b04a");
+  for (const x of [174, 179, 183]) px(x, 123, "#c2453a");
+  if (won) trophy(150, 116 - Math.round(ease(span(t, 3.4, 3.7)) * 4));
+  if (won)
+    for (let i = 0; i < 40; i++) {
+      const x = (hash(i, 61) * W + Math.sin(t * 2 + i) * 4) % W;
+      const y = ((t - 3.4) * 40 + hash(i, 62) * 60) % 110;
+      rect(x, y, 2, 1, ["#e8486a", "#e6c35c", "#5ec77a", "#5fc8ff", "#f4f1e8"][i % 5]);
+    }
+  balloon(136, 104, "idea", 0.9, t, 1.2);
+  balloon(210, 104, "!", 2.0, t, 1.0);
+  say(186, 105, "WE WON!", 3.6, t, 1.3);
+}
+hackathon.entry = [160, 132];
+hackathon.exit = [262, 132, 70];
+
+// --- 8. Teaching: an online class on using AI that broke the attendance record ---
+
+export function teach(t) {
+  rect(0, 0, W, 104, "#e4e8ee");
+  rect(0, 104, W, 32, "#c9c3ba");
+  for (let x = 0; x < W; x += 24) rect(x, 104, 1, 32, "#bdb6ac");
+  // The call on the wall screen: the slide on the left, everyone who joined on the right.
+  rect(112, 8, 198, 88, "#1c2230");
+  rect(114, 10, 194, 84, "#0f1626");
+  rect(118, 14, 72, 76, "#f4f1ea");
+  text("HOW TO", 122, 18, "#25160e", 2);
+  text("USE AI", 122, 31, "#b85a26", 2);
+  for (let i = 0; i < 4; i++) {
+    rect(122, 48 + i * 9, 4, 4, ["#b85a26", "#3d73c7", "#2f7d54", "#c9a24a"][i]);
+    rect(129, 49 + i * 9, 26 + ((i * 11) % 30), 2, "#9aa3ad");
+  }
+  const COLS = 12;
+  const shown = Math.floor(lerp(4, 72, ease(span(t, 1.6, 4.4))));
+  for (let i = 0; i < shown; i++) {
+    const x = 196 + (i % COLS) * 9;
+    const y = 14 + Math.floor(i / COLS) * 10;
+    rect(x, y, 8, 9, ["#2a3550", "#2f2a44", "#26403a", "#3a2f2a"][i % 4]);
+    rect(x + 2, y + 2, 4, 4, ["#f8d6b8", "#cf9268", "#ecc09a", "#ad7450", "#f2cbab"][Math.floor(hash(i, 71) * 5)]);
+    rect(x + 2, y + 2, 4, 1, ["#3a2214", "#141010", "#8a6a2a", "#6e6a66"][Math.floor(hash(i, 72) * 4)]);
+    rect(x + 1, y + 7, 6, 2, ["#3d73c7", "#b85a26", "#2f7d54", "#8f6cc8"][Math.floor(hash(i, 73) * 4)]);
+  }
+  // How many joined, against the old record.
+  const mark = 196 + Math.round(108 * 0.8);
+  rect(196, 80, 108, 4, "#2a3550");
+  rect(196, 80, Math.round(108 * (shown / 72)), 4, shown / 72 > 0.8 ? "#5ec77a" : "#5fc8ff");
+  for (let y = 77; y < 87; y += 2) px(mark, y, "#e6c35c");
+  text("RECORD", mark - 25, 87, "#e6c35c");
+  if (t > 3.9) {
+    rect(210, 38, 82, 16, "#ffffff");
+    rect(211, 39, 80, 14, "#d93a3a");
+    text("NEW RECORD", Math.round(251 - textWidth("NEW RECORD") / 2), 44, "#ffffff");
+  }
+  // John at his desk, teaching, then on his way.
+  plant(14, 104);
+  const [x0, y0] = teach.entry;
+  const me = walkPath([[1.0, x0], [1.6, 62], [4.8, 62], [6.0, teach.exit[0]]], t);
+  const seated = t >= 1.6 && t < 4.8;
+  chair(56, 130, "#6b7380");
+  desk(64, 120, 30, 130, "#cfd3da", "#b3b9c2");
+  laptop(72, 120, "#3d73c7", t, true);
+  if (seated) john(62, 130, "right", t * 1.4, "type");
+  else john(Math.round(me.x), y0, me.dir, me.x / 48, me.moving ? "walk" : "stand");
+  say(66, 102, "LET'S TRY IT!", 2.3, t, 1.3);
+  if (t > 3.9) balloon(66, 103, "heart", 4.0, t, 0.8);
+}
+teach.entry = [40, 130, 60];
+teach.exit = [250, 130, 64];
+
+// --- 9. With customers: their problem, an agent for it ---
 
 export function customers(t) {
   rect(0, 0, W, 104, "#dfe6ee");
@@ -895,7 +1074,7 @@ export function customers(t) {
 customers.entry = [40, 131, 55];
 customers.exit = [84, 131];
 
-// --- 7. Agent memory, the patent ---
+// --- 10. Agent memory, the patent ---
 
 export function memory(t) {
   rect(0, 0, W, H, "#0d1117");
@@ -986,7 +1165,7 @@ export function memory(t) {
 memory.entry = [88, 130];
 memory.exit = [250, 130, 69];
 
-// --- 8. On stage: the work shown in 2024 and 2025 ---
+// --- 11. On stage: the work shown in the CEO's keynotes of 2024 and 2025 ---
 
 export function build(t) {
   rect(0, 0, W, H, "#06070d");
@@ -1033,12 +1212,13 @@ export function build(t) {
   }
   rect(0, 100, W, 10, "#1c2230");
   rect(0, 100, W, 1, "#4a8fe0");
-  text("MICROSOFT BUILD", 209 - textWidth("MICROSOFT BUILD") / 2, 103, "#6c9be0");
-  glow(209, 92, 16, "#9fb8ff", 0.35);
-  rect(206, 76, 6, 6, "#2a3040");
-  rect(204, 82, 10, 12, "#2a3040");
-  rect(205, 94, 3, 6, "#2a3040");
-  rect(210, 94, 3, 6, "#2a3040");
+  text("MICROSOFT BUILD KEYNOTE", Math.round(209 - textWidth("MICROSOFT BUILD KEYNOTE") / 2), 103, "#6c9be0");
+  // The CEO's keynote: the presenter at a lectern in the spotlight.
+  glow(209, 86, 18, "#9fb8ff", 0.35);
+  person(1, 209, 100, "front", t, "stand");
+  rect(201, 86, 16, 14, "#2a3040");
+  rect(201, 86, 16, 1, "#4a5878");
+  text("CEO", Math.round(209 - textWidth("CEO") / 2), 90, "#9fc0ff");
   for (let row = 0; row < 3; row++)
     for (let i = 0; i < 30; i++) {
       const x = i * 11 + (row % 2) * 5 - 4;
@@ -1056,7 +1236,7 @@ export function build(t) {
 build.entry = [40, 112, 50];
 build.exit = [60, 112];
 
-// --- 9. Open source, at home in the evening: Kodosi on the screen, BoBe on the desk ---
+// --- 12. Open source, at home in the evening: Kodosi on the screen, BoBe on the desk ---
 
 // BoBe's ESP32 body: a yellow capsule with stubby arms, a ring antenna and a face on its screen.
 // (x, y) is the bottom left corner, on the desk.
@@ -1194,7 +1374,62 @@ export function openSource(t) {
 openSource.entry = [134, 130];
 openSource.exit = [250, 130, 68];
 
-// --- 10. Building agents with the team: a brain, then tools, then it wakes up ---
+// --- 13. The homelab, and BoBe running it ---
+
+export function homelab(t) {
+  rect(0, 0, W, 104, "#1d2233");
+  for (let x = 0; x < W; x += 16) rect(x, 0, 1, 104, "#21273b");
+  rect(0, 104, W, 32, "#2a2a3a");
+  for (let x = 0; x < W; x += 24) rect(x, 104, 1, 32, "#2f2f40");
+  rect(0, 104, W, 1, "#353548");
+  // A rack of shelves: the router and the switch up top, BoBe beside them; the mini PC, the
+  // drives and a small screen with the dashboard below.
+  rect(166, 30, 2, 74, "#5e3e28");
+  rect(298, 30, 2, 74, "#5e3e28");
+  rect(166, 60, 134, 3, "#7a5236");
+  rect(166, 100, 134, 4, "#7a5236");
+  rect(166, 28, 134, 3, "#7a5236");
+  rect(213, 18, 40, 10, "#2a2f38");
+  text("HOMELAB", Math.round(233 - textWidth("HOMELAB") / 2), 21, "#5ec77a");
+  const blink = (i, rate = 6) => Math.floor(t * rate + i * 1.7) % 3 !== 0;
+  rect(176, 50, 24, 10, "#2a2f38");
+  rect(179, 42, 1, 8, "#4a515c");
+  rect(196, 42, 1, 8, "#4a515c");
+  for (let i = 0; i < 4; i++) px(180 + i * 4, 53, blink(i) ? "#5ec77a" : "#1f3a2a");
+  rect(206, 54, 28, 6, "#2a2f38");
+  for (let i = 0; i < 8; i++) px(208 + i * 3, 56, blink(i + 4, 9) ? "#e6c35c" : "#3a3020");
+  bobe(248, 60, t, true, t > 4.0);
+  rect(176, 86, 24, 14, "#1c2027");
+  rect(176, 86, 24, 1, "#3a414c");
+  px(179, 90, "#5ec77a");
+  px(182, 90, blink(9, 4) ? "#7fb3ff" : "#1c2a44");
+  rect(206, 76, 28, 24, "#2a2f38");
+  for (let i = 0; i < 4; i++) {
+    rect(208, 78 + i * 5, 24, 4, "#3a414c");
+    px(229, 79 + i * 5, blink(i + 12, 8) ? "#5ec77a" : "#22312a");
+  }
+  rect(242, 70, 50, 30, "#1c2230");
+  rect(244, 72, 46, 26, "#0f1626");
+  for (let i = 0; i < 6; i++) {
+    const x = 247 + (i % 3) * 15;
+    const y = 75 + Math.floor(i / 3) * 11;
+    rect(x, y, 12, 8, "#1c2a44");
+    rect(x + 2, y + 3, 2, 2, t > 2.8 + i * 0.15 ? "#5ec77a" : "#5a6270");
+    rect(x + 5, y + 3, 5, 1, "#3a4a66");
+  }
+  for (const [x1, x2, y] of [[188, 220, 63], [200, 242, 99]]) rect(x1, y, x2 - x1, 1, "#3a3f56");
+  // John asks; BoBe answers.
+  const [x0, y0] = homelab.entry;
+  const me = walkPath([[1.0, x0], [2.0, 130], [5.0, 130], [6.0, homelab.exit[0]]], t);
+  john(Math.round(me.x), y0, "right", me.moving ? me.x / 48 : t, me.moving ? "walk" : t > 2.0 && t < 2.6 ? "point" : "stand");
+  say(130, 103, "STATUS?", 2.0, t, 0.9);
+  say(254, 38, "ALL SERVICES UP", 2.7, t, 1.3);
+  say(254, 38, "BACKUPS DONE", 4.1, t, 1.0);
+}
+homelab.entry = [40, 130, 60];
+homelab.exit = [250, 130, 64];
+
+// --- 14. Building agents with the team: a brain, then tools, then it wakes up; then the red team tries to break it ---
 
 function tool(kind, x, y) {
   x = Math.round(x);
@@ -1456,7 +1691,9 @@ export function workshop(t) {
   for (let i = 0; i < 4; i++) rect(22 + i * 18, 76, 14, 10, ["#3f6fb5", "#c9784d", "#4f8b5a", "#d9a441"][i]);
   rect(222, 22, 82, 44, "#c9ced6");
   rect(223, 23, 80, 42, "#fbfcfd");
-  text("BUILDING AGENTS", 263 - textWidth("BUILDING AGENTS") / 2, 26, "#3a4048");
+  const red = t > 5.9;
+  const title = red ? "RED TEAMING" : "BUILDING AGENTS";
+  text(title, Math.round(263 - textWidth(title) / 2), 26, red ? "#c2453a" : "#3a4048");
   brain(232, 44);
   for (const [kind, x, y] of [["wrench", 262, 34], ["lens", 262, 48], ["doc", 282, 34], ["card", 280, 50]]) {
     rect(242, 47, kind === "wrench" || kind === "lens" ? 16 : 34, 1, "#9aa3ad");
@@ -1465,11 +1702,11 @@ export function workshop(t) {
   rect(222, 66, 82, 2, "#aab1bb");
   // The bench, the team behind it, John walking in to join them.
   const [x0, y0] = workshop.entry;
-  const me = walkPath([[1.0, x0], [2.2, 150], [2.25, 150, "front"], [6.0, 150, "front"], [6.05, 150], [7.4, workshop.exit[0]]], t);
+  const me = walkPath([[1.0, x0], [2.2, 150], [2.25, 150, "front"], [7.3, 150, "front"], [7.35, 150], [8.6, workshop.exit[0]]], t);
   const done = t >= 5.2;
   const pose = me.moving ? "walk" : me.dir === "front" ? (t < 2.6 && t > 2.25 ? "lift" : done && t < 6.0 ? "cheer" : "stand") : "stand";
   john(Math.round(me.x), y0, me.dir, me.moving ? me.x / 48 : t, pose);
-  for (const [who, x] of [[1, 112], [3, 132], [2, 206], [6, 228]]) person(who, x, 132, "front", t + x, done ? "cheer" : "stand");
+  for (const [who, x] of [[1, 112], [3, 132], [2, 206], [6, 228]]) person(who, x, 132, "front", t + x, done && t < 5.9 ? "cheer" : "stand");
   rect(96, 127, 148, 2, "#9aa6ba");
   rect(96, 129, 148, 4, "#7f8a9c");
   rect(100, 133, 3, 3, "#6c7686");
@@ -1479,14 +1716,42 @@ export function workshop(t) {
   robot(RX, 127, t, { hasBrain: done, on: done, tools: done ? 4 : 0, happy: done });
   if (t < 2.25) brain(146, 121);
   else if (!done) brain(146, lerp(121, 96, ease(span(t, 2.25, 2.55))));
-  balloon(RX, 96, "heart", 5.4, t, 1.4);
+  balloon(RX, 96, "heart", 5.4, t, 1.0);
   say(206, 105, "IT NEEDS A BRAIN!", 1.05, t, 1.4);
-  say(112, 105, "IT WORKS!", 5.5, t, 1.2);
+  say(112, 105, "IT WORKS!", 5.5, t, 0.9);
+  // Then the red team: a poisoned memory card thrown at the agent, which it refuses.
+  say(228, 105, "LET'S BREAK IT", 5.95, t, 0.9);
+  if (t > 6.2 && t < 7.0) {
+    const hit = t < 6.6;
+    const k = hit ? ease(span(t, 6.2, 6.6)) : 1 - ease(span(t, 6.6, 7.0)) * 0.6;
+    const cx = Math.round(lerp(228, RX + 10, k));
+    const cy = Math.round(lerp(104, 112, k) - Math.sin(k * Math.PI) * 10);
+    if (hit || t < 6.9) {
+      rect(cx - 4, cy - 3, 9, 7, "#c2453a");
+      rect(cx - 3, cy - 2, 7, 5, "#f4f1e8");
+      px(cx - 1, cy - 1, "#2a2230");
+      px(cx + 1, cy - 1, "#2a2230");
+      rect(cx - 1, cy + 1, 3, 1, "#2a2230");
+    }
+  }
+  if (t > 6.6 && t < 7.4) {
+    for (let i = 0; i < 40; i++) {
+      const a = (i / 40) * Math.PI * 2;
+      px(Math.round(RX + Math.cos(a) * 16), Math.round(112 + Math.sin(a) * 13), i % 2 ? "#5fc8ff" : "#bfeaff");
+    }
+    rect(RX - 3, 80, 6, 1, "#9aa3ad");
+    rect(RX - 3, 80, 1, 4, "#9aa3ad");
+    rect(RX + 2, 80, 1, 4, "#9aa3ad");
+    rect(RX - 4, 84, 8, 6, "#e6c35c");
+    px(RX, 86, "#2a2230");
+    px(RX, 87, "#2a2230");
+  }
+  say(RX, 78, "BLOCKED!", 6.7, t, 0.8);
 }
 workshop.entry = [40, 128, 60];
 workshop.exit = [250, 128, 70];
 
-// --- 11. Zürich: the lake, the Alps, and work ---
+// --- 15. Zürich: the lake, the Alps, a coffee, and you ---
 
 export function zurich(t) {
   bands(0, 78, ["#24345f", "#38497c", "#5c6298", "#8f78a8", "#c48ca2", "#e8a48e", "#f4c89a"]);
@@ -1578,7 +1843,7 @@ export function zurich(t) {
   text("ZURICH", zx, 86, "#ffffff");
   px(zx + 4, 84, "#ffffff");
   px(zx + 6, 84, "#ffffff");
-  const a = walkPath([[1.4, 340], [6.0, 40, "left"]], t);
+  const a = walkPath([[0.4, 340], [3.0, 40, "left"]], t);
   person(0, Math.round(a.x), 118, "left", a.x / 48, "walk");
   rect(150, 113, 34, 2, "#6b4428");
   rect(152, 115, 2, 9, "#5a3a22");
@@ -1587,18 +1852,13 @@ export function zurich(t) {
   rect(150, 126, 34, 1, "#6b4428");
   rect(152, 127, 2, 3, "#5a3a22");
   rect(180, 127, 2, 3, "#5a3a22");
-  // John sits down on the bench with his laptop and works; people walk by on the quay.
+  // John comes along the quay with a coffee and his laptop, turns to you, and the camera comes in.
   const [x0, y0] = zurich.entry;
-  const me = walkPath([[1.0, x0], [2.9, 162]], t);
-  if (t >= 2.9) {
-    john(162, 128, "right", t, "type");
-    rect(157, 122, 11, 1, "#9aa3ad");
-    for (let i = 0; i < 7; i++) {
-      px(167 + Math.floor(i / 3), 121 - i, "#4a515c");
-      px(166 + Math.floor(i / 3), 121 - i, "#7fb3ff");
-    }
-  } else john(Math.round(me.x), y0, "right", me.x / 48, me.moving ? "walk" : "stand");
+  const me = walkPath([[1.0, x0], [2.9, 160], [2.95, 160, "front"]], t);
+  john(Math.round(me.x), y0, me.dir, me.moving ? me.x / 48 : t, me.dir === "front" ? "coffee" : "carry");
   const b = walkPath([[0, 262], [6.0, 336]], t);
   person(3, Math.round(b.x), 134, "right", b.x / 48, "walk");
+  return { zoom: [160, y0 - 16, lerp(1, 8 / 3, ease(span(t, 3.3, 5.3)))] };
 }
 zurich.entry = [40, 130, 64];
+zurich.walkPose = "carry";

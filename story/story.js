@@ -1,7 +1,7 @@
 // The story so far, as a short pixel-art film. seek(canvas, t) draws the frame at t seconds, so
 // the same code plays live on a page and renders frame by frame to video (render.ts).
 // Art is drawn at 320x136 and scaled 3x without smoothing.
-import { W, H, art, g, fade, iris, ease, lerp, span } from "./pixel.js";
+import { W, H, art, g, fade, iris, ease, lerp, span, clamp } from "./pixel.js";
 import { person, stage } from "./sprites.js";
 import * as S from "./scenes.js";
 
@@ -20,12 +20,16 @@ const SCENES = [
   { len: 8.6, draw: S.orbit, out: "down" },
   { len: 7.4, draw: S.ski, out: "door" },
   { len: 6.4, draw: S.coauthor, out: "walk" },
+  { len: 6.4, draw: S.talks, out: "iris" },
+  { len: 6.0, draw: S.hackathon, out: "walk" },
+  { len: 6.0, draw: S.teach, out: "walk" },
   { len: 6.2, draw: S.customers, out: "iris" },
   { len: 6.2, draw: S.memory, out: "walk" },
   { len: 5.6, draw: S.build, out: "iris" },
   { len: 6.4, draw: S.openSource, out: "walk" },
-  { len: 7.4, draw: S.workshop, out: "walk" },
-  { len: 6.0, draw: S.zurich },
+  { len: 6.0, draw: S.homelab, out: "walk" },
+  { len: 8.6, draw: S.workshop, out: "walk" },
+  { len: 7.2, draw: S.zurich },
 ];
 
 let at = 0;
@@ -76,7 +80,7 @@ function transition(prev, scene, local, t) {
     const [xa, ya, va] = prev.draw.exit;
     const [xb, yb, vb] = scene.draw.entry;
     const x = hermite(xa, W + xb, va * PUSH, vb * PUSH, k) - ease(k) * W;
-    person("john", Math.round(x), Math.round(lerp(ya, yb, ease(k))), "right", t, "walk");
+    person("john", Math.round(x), Math.round(lerp(ya, yb, ease(k))), "right", t, scene.draw.walkPose ?? "walk");
     return true;
   }
   if (how === "down" && local < TILT) {
@@ -113,9 +117,11 @@ export function seek(canvas, t) {
   const scene = SCENES[i];
   const prev = SCENES[i - 1];
   const local = Math.min(t - scene.from, scene.len);
+  // A scene can ask the camera to zoom: [centre x, centre y, factor].
+  let zoom = null;
   if (!transition(prev, scene, local, t)) {
     g.clearRect(0, 0, W, H);
-    scene.draw(local);
+    zoom = scene.draw(local)?.zoom ?? null;
   }
   if (scene.out === "iris") {
     const [x, y] = scene.draw.exit;
@@ -133,5 +139,9 @@ export function seek(canvas, t) {
 
   const ctx = canvas.getContext("2d");
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(art, 0, 0, W * SCALE, H * SCALE);
+  if (zoom) {
+    const [zx, zy, k] = zoom;
+    const [sw, sh] = [W / k, H / k];
+    ctx.drawImage(art, clamp(zx - sw / 2, 0, W - sw), clamp(zy - sh / 2, 0, H - sh), sw, sh, 0, 0, W * SCALE, H * SCALE);
+  } else ctx.drawImage(art, 0, 0, W * SCALE, H * SCALE);
 }
