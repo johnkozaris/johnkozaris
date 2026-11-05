@@ -21,4 +21,4 @@
 <a href="https://github.com/johnkozaris/mcpHomeManager"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/repo-home-dark.svg"><img src="assets/repo-home-light.svg" alt="mcpHomeManager: self-hosted MCP gateway for homelab services."></picture></a>
 </p>
 
-<p align="center"><sub><a href="https://johnkozaris.com">johnkozaris.com</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://x.com/kozaris">X</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.linkedin.com/in/john-kozaris/">LinkedIn</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://github.com/johnkozaris/johnkozaris/blob/main/HOW-IT-WORKS.md">How this page works</a></sub></p>
+<p align="center"><sub><a href="https://johnkozaris.com">johnkozaris.com</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://x.com/kozaris">X</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.linkedin.com/in/john-kozaris/">LinkedIn</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://scholar.google.com/citations?user=-wuytrAAAAAJ">Google Scholar</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://github.com/johnkozaris/johnkozaris/blob/main/HOW-IT-WORKS.md">How this page works</a></sub></p>
