@@ -11,7 +11,7 @@
 
 <p align="center">
 <a href="https://github.com/johnkozaris/Kodosi"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/project-kodosi-dark.svg"><img src="assets/project-kodosi-light.svg" alt="Kodosi: people and coding agents working together through shared terminals, rooms and tasks, with end-to-end encryption."></picture></a>
-<a href="https://github.com/Sombrace/BoBe"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/project-bobe-dark.svg"><img src="assets/project-bobe-light.svg" alt="BoBe: a local-first proactive AI companion for macOS, with an iPhone app and an ESP32 body."></picture></a>
+<a href="https://github.com/Sombrace/BoBe"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/project-bobe-dark.svg"><img src="assets/project-bobe-light.svg" alt="BoBe: a local-first proactive AI assistant for macOS, with an iPhone app and an ESP32 body."></picture></a>
 </p>
 
 <p align="center">

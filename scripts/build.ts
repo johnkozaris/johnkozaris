@@ -65,11 +65,11 @@ for (const [mode, look] of Object.entries(looks)) {
       slug: "bobe",
       name: "BoBe",
       line: "",
-      body: "A local-first proactive AI companion for macOS, with an iPhone app and an ESP32 body.",
+      body: "A local-first proactive AI assistant for macOS, with an iPhone app and an ESP32 body.",
       meta: meta("Rust, Swift", rel.bobe),
       art: await art(`bobe-${mode}.jpg`),
       href: "https://github.com/Sombrace/BoBe",
-      alt: "BoBe: a local-first proactive AI companion for macOS, with an iPhone app and an ESP32 body.",
+      alt: "BoBe: a local-first proactive AI assistant for macOS, with an iPhone app and an ESP32 body.",
     },
   ];
   const repos: Repo[] = [
